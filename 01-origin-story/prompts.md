@@ -24,6 +24,13 @@ prompt library built from your own questions.
 
 ### 1.
 
+Can you explain and clarify how you came up with your unverified hypothesis? What facts and pieces of information led to this hypothesis? "the 4.2 weighting applies equally to responders who turn pings down, so a drop in acceptance pushes them lower and they get pinged less"
+
 ### 2.
 
+Can you clarify "starved responders" and how it could look quiet and have a supply risk? Can you theorize and show reasoning if its a push failure or the supply is not there?
+
 ### 3.
+
+What's contradictory or missing across the wiki pages, the handover note, and the rest of this folder?
+

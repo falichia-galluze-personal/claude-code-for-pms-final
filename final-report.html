@@ -389,7 +389,612 @@ Turn that into a skill called review-checklist, so I can point it at any brief a
     <h2>Not a setting. Something Kip would notice.</h2>
     <div class="frame">
       <div class="bar-top"><span>prototype.html · click Today / Proposed, then "Check in"</span><a href="05-super-speed/prototype.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
-      <iframe src="05-super-speed/prototype.html" title="Rook Dispatch gone-quiet prototype" loading="lazy"></iframe>
+      <iframe title="Rook Dispatch gone-quiet prototype" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+&lt;title&gt;Rook Dispatch console — &quot;gone quiet&quot; prototype&lt;/title&gt;
+&lt;style&gt;
+
+  :root {
+    --ink:#111827; --ink-2:#374151; --mute:#5b6475; --line:#e5e7eb; --bg:#f3f4f8; --card:#ffffff;
+    --blue:#2563eb; --blue-d:#1d4ed8; --blue-bg:#eff4ff;
+    --amber:#92400e; --amber-bg:#fffbeb; --amber-line:#fcd9a0; --amber-dot:#f59e0b;
+    --green:#065f46; --green-bg:#ecfdf5; --green-line:#a7e3c7; --green-dot:#10b981;
+    --red:#991b1b; --red-bg:#fef2f2; --red-line:#f5c2c2; --red-dot:#ef4444;
+    --grey-bg:#f3f4f6; --grey-line:#e5e7eb; --grey-dot:#9ca3af;
+    --r-sm:8px; --r-md:12px; --r-lg:16px;
+    --shadow:0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.06);
+    --shadow-lg:0 12px 32px rgba(16,24,40,.18);
+  }
+  * { box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
+  body { margin:0; font:14px/1.5 Inter,&quot;Segoe UI&quot;,system-ui,-apple-system,Roboto,Arial,sans-serif; color:var(--ink); background:var(--bg); -webkit-font-smoothing:antialiased; }
+
+  /* App bar */
+  header { background:#0f172a; color:#fff; padding:0 24px; height:56px; display:flex; justify-content:space-between; align-items:center; }
+  header b { font-size:15px; font-weight:600; letter-spacing:.1px; display:flex; align-items:center; gap:10px; }
+  header b::before { content:&quot;&quot;; width:22px; height:22px; border-radius:6px; background:linear-gradient(135deg,#60a5fa,#2563eb); display:inline-block; }
+  header span { color:#cbd5e1; font-size:13px; display:flex; align-items:center; gap:8px; }
+  header span::before { content:&quot;K&quot;; width:26px; height:26px; border-radius:50%; background:#334155; color:#fff; font-size:12px; font-weight:600; display:inline-flex; align-items:center; justify-content:center; }
+  .banner { background:#fffbeb; color:#78350f; padding:8px 24px; font-size:12px; border-bottom:1px solid #fde68a; text-align:center; }
+
+  /* Toolbar */
+  .toolbar { max-width:1120px; margin:20px auto 0; padding:0 24px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .seg { display:inline-flex; padding:3px; border-radius:10px; background:#e5e7eb; }
+  .seg button { border:0; border-radius:8px; padding:7px 18px; background:transparent; color:var(--ink-2); font-weight:500; min-height:34px; }
+  .seg button.on { background:#fff; color:var(--ink); font-weight:600; box-shadow:var(--shadow); }
+  .toolbar .hint { color:var(--mute); font-size:13px; margin-left:auto; }
+  #btnReset { border:0; background:transparent; color:var(--mute); padding:7px 10px; }
+  #btnReset:hover { color:var(--ink); background:#e5e7eb; filter:none; }
+
+  /* Layout */
+  main { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:32px; padding:20px 24px 32px; max-width:1120px; margin:0 auto; }
+  h2 { margin:0 0 12px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--mute); }
+
+  /* Responder cards */
+  .card { background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; margin-bottom:16px; box-shadow:var(--shadow); }
+  .row { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .row &gt; div:first-child { position:relative; padding-left:52px; min-height:40px; }
+  .row &gt; div:first-child::before { position:absolute; left:0; top:0; width:40px; height:40px; border-radius:50%; background:#e0e7ff; color:#3730a3; font-weight:600; font-size:13px; display:flex; align-items:center; justify-content:center; }
+  #cardA .row &gt; div:first-child::before { content:&quot;MM&quot;; }
+  #cardB .row &gt; div:first-child::before { content:&quot;TG&quot;; background:#dbeafe; color:#1e40af; }
+  .name { font-weight:600; font-size:16px; line-height:1.3; } .sub { color:var(--mute); font-size:13px; }
+
+  /* Status chips */
+  .tag { display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:3px 10px 3px 8px; border-radius:999px; font-weight:600; white-space:nowrap; border:1px solid transparent; }
+  .tag::before { content:&quot;&quot;; width:7px; height:7px; border-radius:50%; background:currentColor; }
+  .tag.quiet { background:var(--amber-bg); color:var(--amber); border-color:var(--amber-line); }
+  .tag.load { background:var(--blue-bg); color:#1e40af; border-color:#c7d7fb; }
+  .tag.ok { background:var(--green-bg); color:var(--green); border-color:var(--green-line); }
+  .tag.wait { background:var(--grey-bg); color:var(--ink-2); border-color:var(--grey-line); }
+  .tag.bad { background:var(--red-bg); color:var(--red); border-color:var(--red-line); }
+
+  /* Chart */
+  .bars { display:flex; align-items:flex-end; gap:6px; height:52px; margin:16px 0 6px; padding-bottom:1px; border-bottom:1px solid var(--line); }
+  .bars i { width:22px; background:#d5dbe8; border-radius:4px 4px 0 0; display:block; }
+  .bars i.hot { background:var(--amber-dot); } .bars i.blue { background:var(--blue); }
+  .bars i.proj { background:repeating-linear-gradient(45deg,#6ee7b7,#6ee7b7 4px,#c7f3e0 4px,#c7f3e0 8px); }
+  .bars i.projbad { background:repeating-linear-gradient(45deg,#fca5a5,#fca5a5 4px,#fde0e0 4px,#fde0e0 8px); }
+  .bars i.projblue { background:repeating-linear-gradient(45deg,#93b4f8,#93b4f8 4px,#dbe6fd 4px,#dbe6fd 8px); }
+  .bars .gap { width:10px; background:none; }
+  .legend { color:var(--mute); font-size:12px; margin-top:4px; }
+  .sub b { color:var(--ink); font-size:14px; }
+
+  /* Notices */
+  .notice { background:var(--amber-bg); border:1px solid var(--amber-line); border-left:4px solid var(--amber-dot); border-radius:var(--r-md); padding:14px 16px; margin-top:16px; animation:rise .18s ease-out; }
+  .notice.done { background:var(--green-bg); border-color:var(--green-line); border-left-color:var(--green-dot); }
+  .notice.bad { background:var(--red-bg); border-color:var(--red-line); border-left-color:var(--red-dot); }
+  .notice.plain { background:var(--grey-bg); border-color:var(--grey-line); border-left-color:var(--grey-dot); color:var(--ink-2); }
+  .notice p { margin:0 0 12px; } .notice p:last-child { margin:0; }
+  .notice b { font-weight:600; }
+  @keyframes rise { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+  .why { display:none; margin-top:12px; padding:10px 12px; background:#fff; border:1px solid var(--amber-line); border-radius:var(--r-sm); font-size:13px; color:var(--ink-2); }
+  .ff { margin-top:16px; padding-top:16px; border-top:1px solid var(--green-line); }
+  .ff .btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+
+  /* Buttons: primary / secondary / ghost */
+  button { font:inherit; font-weight:500; cursor:pointer; border-radius:var(--r-sm); padding:8px 14px; min-height:36px; border:1px solid #cbd2dd; background:#fff; color:var(--ink); transition:background .12s, border-color .12s, box-shadow .12s; }
+  button:hover { background:#f8fafc; border-color:#b6bfce; }
+  button:active { transform:translateY(1px); }
+  button.primary { background:var(--blue); border-color:var(--blue); color:#fff; font-weight:600; box-shadow:0 1px 2px rgba(37,99,235,.35); }
+  button.primary:hover { background:var(--blue-d); border-color:var(--blue-d); }
+  #btnWhy, #optCancel { border-color:transparent; background:transparent; color:var(--ink-2); }
+  #btnWhy:hover, #optCancel:hover { background:rgba(0,0,0,.05); }
+  button:focus-visible, select:focus-visible { outline:3px solid #93c5fd; outline-offset:2px; }
+
+  /* Modal */
+  .modal-bg { display:none; position:fixed; inset:0; background:rgba(15,23,42,.5); align-items:center; justify-content:center; padding:16px; }
+  .modal { background:#fff; border-radius:var(--r-lg); padding:24px; width:440px; max-width:100%; box-shadow:var(--shadow-lg); animation:rise .18s ease-out; }
+  .modal h3 { margin:0 0 4px; font-size:18px; }
+  .opt { display:block; width:100%; text-align:left; margin-top:12px; padding:14px 16px; border-radius:var(--r-md); min-height:0; }
+  .opt:hover { border-color:var(--blue); background:var(--blue-bg); }
+  .opt b { display:block; font-weight:600; } .opt span { color:var(--mute); font-size:13px; font-weight:400; }
+
+  /* Phone */
+  .phonewrap { position:sticky; top:16px; align-self:start; }
+  .phone { width:300px; margin:0 auto; background:#0b1020; border-radius:40px; padding:12px; box-shadow:var(--shadow-lg); position:relative; }
+  .phone::before { content:&quot;&quot;; position:absolute; top:20px; left:50%; width:84px; height:22px; margin-left:-42px; background:#0b1020; border-radius:12px; z-index:2; }
+  .screen { background:linear-gradient(#eef1f8,#f8f9fc); border-radius:30px; min-height:500px; padding:44px 14px 18px; display:flex; flex-direction:column; }
+  .screen .time { font-size:34px; font-weight:300; text-align:center; color:var(--ink); margin-bottom:20px; letter-spacing:-.5px; }
+  .idle { margin:auto; text-align:center; color:var(--mute); font-size:15px; padding:0 12px; }
+  .idle b { color:var(--ink); }
+  .msg { background:rgba(255,255,255,.95); border:1px solid var(--line); border-radius:18px; padding:14px 16px; box-shadow:var(--shadow); color:var(--ink-2); animation:rise .2s ease-out; }
+  .msg::before { content:&quot;ROOK DISPATCH&quot;; display:block; font-size:10px; font-weight:600; letter-spacing:.08em; color:var(--mute); margin-bottom:6px; }
+  .msg b { display:block; font-size:16px; color:var(--ink); margin-bottom:2px; }
+  .msg button { width:100%; margin-top:10px; min-height:42px; }
+  .undo { margin-top:auto; font-size:13px; color:var(--mute); text-align:center; padding-top:16px; }
+  .undo button { font-size:13px; padding:4px 10px; min-height:30px; margin-left:4px; }
+  .caption { text-align:center; color:var(--mute); font-size:13px; margin-top:14px; min-height:20px; }
+
+  /* Notice icons */
+  .notice { position:relative; padding-left:48px; }
+  .notice::before { content:&quot;&quot;; position:absolute; left:16px; top:15px; width:20px; height:20px; background-repeat:no-repeat; background-size:20px 20px;
+    background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 24 24&#39; fill=&#39;none&#39; stroke=&#39;%23b45309&#39; stroke-width=&#39;2&#39; stroke-linecap=&#39;round&#39; stroke-linejoin=&#39;round&#39;%3E%3Cpath d=&#39;M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z&#39;/%3E%3C/svg%3E&quot;); }
+  .notice.done::before { background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 24 24&#39; fill=&#39;none&#39; stroke=&#39;%23059669&#39; stroke-width=&#39;2&#39; stroke-linecap=&#39;round&#39; stroke-linejoin=&#39;round&#39;%3E%3Ccircle cx=&#39;12&#39; cy=&#39;12&#39; r=&#39;10&#39;/%3E%3Cpath d=&#39;m8 12 3 3 5-6&#39;/%3E%3C/svg%3E&quot;); }
+  .notice.bad::before { background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 24 24&#39; fill=&#39;none&#39; stroke=&#39;%23dc2626&#39; stroke-width=&#39;2&#39; stroke-linecap=&#39;round&#39; stroke-linejoin=&#39;round&#39;%3E%3Ccircle cx=&#39;12&#39; cy=&#39;12&#39; r=&#39;10&#39;/%3E%3Cpath d=&#39;M12 8v4m0 4h.01&#39;/%3E%3C/svg%3E&quot;); }
+  .notice.plain::before { background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 24 24&#39; fill=&#39;none&#39; stroke=&#39;%236b7280&#39; stroke-width=&#39;2&#39; stroke-linecap=&#39;round&#39; stroke-linejoin=&#39;round&#39;%3E%3Ccircle cx=&#39;12&#39; cy=&#39;12&#39; r=&#39;10&#39;/%3E%3Cpath d=&#39;M12 16v-4m0-4h.01&#39;/%3E%3C/svg%3E&quot;); }
+
+  /* Check-in option icons */
+  .opt { position:relative; padding-left:54px; }
+  .opt::before { content:&quot;&quot;; position:absolute; left:18px; top:16px; width:22px; height:22px; background-repeat:no-repeat; background-size:22px 22px; }
+  #optSend::before { background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 24 24&#39; fill=&#39;none&#39; stroke=&#39;%232563eb&#39; stroke-width=&#39;2&#39; stroke-linecap=&#39;round&#39; stroke-linejoin=&#39;round&#39;%3E%3Cpath d=&#39;M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z&#39;/%3E%3C/svg%3E&quot;); }
+  #optCall::before { background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 24 24&#39; fill=&#39;none&#39; stroke=&#39;%232563eb&#39; stroke-width=&#39;2&#39; stroke-linecap=&#39;round&#39; stroke-linejoin=&#39;round&#39;%3E%3Cpath d=&#39;M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z&#39;/%3E%3C/svg%3E&quot;); }
+
+  /* Phone status bar */
+  .statusbar { position:absolute; top:12px; left:12px; right:12px; height:40px; padding:6px 26px 0; display:flex; justify-content:space-between; align-items:center; z-index:3; color:var(--ink); font-size:14px; font-weight:600; pointer-events:none; }
+  .statusbar .sb-icons { display:flex; align-items:center; gap:6px; }
+  .statusbar svg { display:block; height:12px; width:auto; }
+
+  /* Ping countdown */
+  .demo { display:flex; justify-content:center; align-items:center; gap:10px; margin-top:16px; flex-wrap:wrap; }
+  .demo .lbl { font-size:12px; color:var(--mute); }
+  .seg.small button { padding:4px 12px; min-height:28px; font-size:13px; }
+  .msg.ping { text-align:center; }
+  .msg.ping .sub2 { color:var(--mute); font-size:13px; }
+  .ring { position:relative; width:124px; height:124px; margin:14px auto 8px; }
+  .ring svg { width:100%; height:100%; display:block; }
+  .ring .trk { fill:none; stroke:#e5e7eb; stroke-width:8; }
+  .ring .prg { fill:none; stroke:var(--blue); stroke-width:8; stroke-linecap:round; stroke-dasharray:282.7; transition:stroke .25s; }
+  .ring.warn .prg { stroke:var(--amber-dot); } .ring.late .prg { stroke:var(--red-dot); }
+  .ring .rtxt { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; }
+  .ring .rtxt b { font-size:34px; font-weight:700; margin:0; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .ring .rtxt span { font-size:11px; color:var(--mute); margin-top:4px; letter-spacing:.06em; text-transform:uppercase; }
+  .ring.late .rtxt b { color:var(--red); animation:pulse .6s ease-in-out infinite alternate; }
+  @keyframes pulse { from { transform:scale(1); } to { transform:scale(1.08); } }
+  .msg.ping .row2 { display:flex; gap:8px; margin-top:10px; } .msg.ping .row2 button { margin-top:0; }
+
+  footer { max-width:1120px; margin:0 auto; padding:0 24px 40px; color:var(--mute); font-size:12px; }
+
+  @media (max-width:880px) { main { grid-template-columns:1fr; gap:24px; } .phonewrap { position:static; } .toolbar .hint { margin-left:0; width:100%; } }
+  @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
+
+  /* ===== Super hero comic theme (overrides) ===== */
+  :root { --ink:#111; --ink-2:#27272a; --mute:#44403c; --line:#111; --bg:#fff7d6; --blue:#2447f5; --blue-d:#1a36c4;
+          --hero-red:#e63946; --hero-yellow:#ffd60a; --heading:Impact,&quot;Arial Black&quot;,&quot;Haettenschweiler&quot;,system-ui,sans-serif; }
+  body { font-family:&quot;Comic Neue&quot;,&quot;Comic Sans MS&quot;,&quot;Chalkboard SE&quot;,&quot;Trebuchet MS&quot;,system-ui,sans-serif; background-color:var(--bg);
+         background-image:radial-gradient(rgba(230,57,70,.2) 1.4px, transparent 1.7px); background-size:16px 16px; }
+
+  header { background:var(--hero-red); border-bottom:4px solid #111; height:62px; }
+  header b { font:400 26px/1 var(--heading); letter-spacing:.05em; text-transform:uppercase; color:#fff; text-shadow:2px 2px 0 #111; }
+  header b::before { width:32px; height:32px; border-radius:0; background:var(--hero-yellow);
+    clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
+  header span { color:#fff; font-weight:700; }
+  header span::before { background:#fff; color:#111; border:3px solid #111; }
+  .banner { background:var(--hero-yellow); color:#111; border-bottom:3px solid #111; font-weight:700; }
+
+  .seg { background:#fff; border:3px solid #111; border-radius:8px; padding:0; box-shadow:4px 4px 0 #111; overflow:hidden; }
+  .seg button { border:0; border-radius:0; background:#fff; color:#111; font-weight:800; box-shadow:none; }
+  .seg button + button { border-left:3px solid #111; }
+  .seg button:hover { background:#fff3b0; }
+  .seg button.on { background:var(--hero-yellow); box-shadow:none; }
+  .seg.small { border-width:2px; box-shadow:2px 2px 0 #111; }
+  .seg.small button + button { border-left-width:2px; }
+  #btnReset { border:3px solid transparent; background:transparent; box-shadow:none; color:#111; text-decoration:underline; }
+  #btnReset:hover { background:rgba(17,17,17,.08); }
+  .toolbar .hint { color:#111; font-weight:700; }
+
+  h2 { font:400 19px/1.2 var(--heading); letter-spacing:.06em; text-transform:uppercase; color:#111; text-shadow:2px 2px 0 var(--hero-yellow); }
+
+  .card { border:3px solid #111; border-radius:10px; box-shadow:6px 6px 0 #111; }
+  .row &gt; div:first-child { padding-left:58px; min-height:44px; }
+  .row &gt; div:first-child::before { width:44px; height:44px; background:var(--hero-yellow); color:#111; border:3px solid #111; font:400 16px/1 var(--heading); letter-spacing:.03em; }
+  #cardB .row &gt; div:first-child::before { background:#7dd3fc; color:#111; }
+  .name { font:400 21px/1.2 var(--heading); letter-spacing:.03em; text-transform:uppercase; }
+  .sub { color:#44403c; }
+
+  .tag { border:2px solid #111; color:#111; font-weight:800; box-shadow:2px 2px 0 #111; transform:rotate(-2deg); }
+  .tag.quiet { background:#ffd60a; border-color:#111; color:#111; } .tag.load { background:#7dd3fc; border-color:#111; color:#111; }
+  .tag.ok { background:#86efac; border-color:#111; color:#111; } .tag.wait { background:#e5e7eb; border-color:#111; color:#111; }
+  .tag.bad { background:#fca5a5; border-color:#111; color:#111; }
+
+  .bars { border-bottom:3px solid #111; }
+  .bars i { border:2px solid #111; border-bottom:0; background:#cbd5e1; }
+  .bars i.hot { background:#ff9f1c; } .bars i.blue { background:#2447f5; }
+  .bars i.gap { border:0; background:none; }
+  .legend { color:#44403c; }
+
+  .notice, .notice.done, .notice.bad, .notice.plain { border:3px solid #111; border-radius:12px; box-shadow:4px 4px 0 #111; color:#111; margin-top:24px; }
+  .notice { background:#ffe066; } .notice.done { background:#b7f5c8; } .notice.bad { background:#ffb4b4; } .notice.plain { background:#eceff4; }
+  .notice::after { content:&quot;&quot;; position:absolute; top:-12px; left:30px; width:18px; height:18px; background:inherit;
+    border-left:3px solid #111; border-top:3px solid #111; transform:rotate(45deg); }
+  .why { background:#fff; border:2px dashed #111; color:#111; }
+  .ff { border-top:3px dashed #111; }
+
+  button { font-family:&quot;Comic Neue&quot;,&quot;Comic Sans MS&quot;,&quot;Chalkboard SE&quot;,system-ui,sans-serif; font-weight:800; border:3px solid #111; border-radius:8px;
+           background:#fff; color:#111; box-shadow:3px 3px 0 #111; }
+  button:hover { background:#fff3b0; border-color:#111; }
+  button:active { transform:translate(3px,3px); box-shadow:0 0 0 #111; }
+  button.primary { background:var(--hero-yellow); border-color:#111; color:#111; box-shadow:3px 3px 0 #111; }
+  button.primary:hover { background:#ffe45c; border-color:#111; }
+  #skipAhead, #btnWhy, #optCancel { background:transparent; border:3px solid transparent; box-shadow:none; text-decoration:underline; color:#111; }
+  #skipAhead:hover, #btnWhy:hover, #optCancel:hover { background:rgba(17,17,17,.08); border-color:transparent; }
+  .seg button, .seg button:active { box-shadow:none; transform:none; }
+  button:focus-visible { outline:3px solid var(--blue); outline-offset:2px; }
+
+  .modal-bg { background:rgba(17,17,17,.62); }
+  .modal { border:4px solid #111; border-radius:12px; box-shadow:8px 8px 0 #111; }
+  .modal h3 { font:400 24px/1.2 var(--heading); letter-spacing:.04em; text-transform:uppercase; }
+  .opt:hover { background:#fff3b0; border-color:#111; }
+  .opt span { color:#44403c; font-weight:600; }
+
+  .phone { background:#111; box-shadow:8px 8px 0 var(--hero-red); }
+  .screen { border:3px solid #111; background-color:#fffdf2; background-image:radial-gradient(rgba(36,71,245,.22) 1.4px, transparent 1.7px); background-size:12px 12px; }
+  .screen .time { font:400 38px/1 var(--heading); letter-spacing:.03em; }
+  .statusbar { color:#111; }
+  .idle { color:#111; font-weight:700; }
+  .msg { border:3px solid #111; border-radius:14px; box-shadow:4px 4px 0 #111; background:#fff; color:#27272a; }
+  .msg::before { color:var(--hero-red); font-weight:800; }
+  .msg b { font:400 20px/1.2 var(--heading); letter-spacing:.03em; text-transform:uppercase; }
+  .ring .trk { stroke:#d4d4d8; } .ring .prg { stroke:#2447f5; } .ring.warn .prg { stroke:#ff9f1c; } .ring.late .prg { stroke:#e63946; }
+  .ring .rtxt b { font:400 40px/1 var(--heading); }
+  .caption, .demo .lbl { color:#111; font-weight:700; }
+  footer { color:#44403c; }
+
+  /* Phone tabs + history */
+  .tabbar { display:flex; gap:6px; margin-top:8px; padding:0 4px; }
+  .tabbar button { flex:1; box-shadow:none; border:0; background:transparent; color:#cbd5e1; border-radius:12px; min-height:34px; font-weight:800; }
+  .tabbar button:hover { background:rgba(255,255,255,.12); }
+  .tabbar button:active { transform:none; }
+  .tabbar button.on { background:var(--hero-yellow); color:#111; }
+  .hh { font:400 30px/1 var(--heading); letter-spacing:.03em; text-transform:uppercase; text-align:center; color:#111; margin-bottom:14px; }
+  .hlist { display:flex; flex-direction:column; gap:10px; max-height:370px; overflow:auto; padding:2px 4px 6px 2px; }
+  .hrow { display:flex; justify-content:space-between; align-items:center; gap:8px; background:#fff; border:3px solid #111; border-radius:12px; box-shadow:3px 3px 0 #111; padding:10px 12px; }
+  .hrow b { display:block; font-size:13px; line-height:1.25; color:#111; }
+  .hrow small { color:#44403c; font-size:12px; }
+  .chip { border:2px solid #111; border-radius:999px; font-weight:800; font-size:12px; padding:2px 10px; white-space:nowrap; color:#111; background:#e5e7eb; }
+  .chip.ok { background:#86efac; } .chip.bad { background:#fca5a5; }
+  .hnote { text-align:center; color:#44403c; font-size:12px; margin-top:auto; padding-top:12px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;header&gt;&lt;b&gt;Rook Dispatch &#183; Handler console&lt;/b&gt;&lt;span&gt;Signed in as Kip &#183; My responders (2)&lt;/span&gt;&lt;/header&gt;
+&lt;div class=&quot;banner&quot;&gt;Prototype for discussion. Course scenario, not a live system. Counts come from the Rook database (data ends 6 Sep). Internal, for Helen only.&lt;/div&gt;
+
+&lt;div class=&quot;toolbar&quot;&gt;
+  &lt;div class=&quot;seg&quot; role=&quot;group&quot; aria-label=&quot;Version&quot;&gt;
+    &lt;button id=&quot;mToday&quot;&gt;Today&lt;/button&gt;&lt;button id=&quot;mProp&quot;&gt;Proposed&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;button id=&quot;btnReset&quot;&gt;Start over&lt;/button&gt;
+  &lt;span class=&quot;hint&quot; id=&quot;modeHint&quot;&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;main&gt;
+  &lt;section&gt;
+    &lt;h2&gt;My responders&lt;/h2&gt;
+    &lt;div class=&quot;card&quot; id=&quot;cardA&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;card&quot; id=&quot;cardB&quot;&gt;&lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;aside class=&quot;phonewrap&quot;&gt;
+    &lt;h2 style=&quot;text-align:center&quot;&gt;What Meteor Mite sees&lt;/h2&gt;
+    &lt;div class=&quot;phone&quot;&gt;
+      &lt;div class=&quot;statusbar&quot; aria-hidden=&quot;true&quot;&gt;
+        &lt;span&gt;9:41&lt;/span&gt;
+        &lt;span class=&quot;sb-icons&quot;&gt;
+          &lt;svg viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;&gt;&lt;rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/&gt;&lt;rect x=&quot;5&quot; y=&quot;5.5&quot; width=&quot;3&quot; height=&quot;6.5&quot; rx=&quot;1&quot;/&gt;&lt;rect x=&quot;10&quot; y=&quot;3&quot; width=&quot;3&quot; height=&quot;9&quot; rx=&quot;1&quot;/&gt;&lt;rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/&gt;&lt;/svg&gt;
+          &lt;svg viewBox=&quot;0 0 16 12&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.8&quot; stroke-linecap=&quot;round&quot;&gt;&lt;path d=&quot;M1.5 4.2a9.5 9.5 0 0 1 13 0&quot;/&gt;&lt;path d=&quot;M4 7a6 6 0 0 1 8 0&quot;/&gt;&lt;circle cx=&quot;8&quot; cy=&quot;10&quot; r=&quot;1&quot; fill=&quot;currentColor&quot; stroke=&quot;none&quot;/&gt;&lt;/svg&gt;
+          &lt;svg viewBox=&quot;0 0 27 12&quot; fill=&quot;none&quot;&gt;&lt;rect x=&quot;0.5&quot; y=&quot;0.5&quot; width=&quot;23&quot; height=&quot;11&quot; rx=&quot;3.5&quot; stroke=&quot;currentColor&quot; opacity=&quot;.45&quot;/&gt;&lt;rect x=&quot;2&quot; y=&quot;2&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;2&quot; fill=&quot;currentColor&quot;/&gt;&lt;path d=&quot;M25 4v4c.8-.3 1.5-1 1.5-2S25.8 4.3 25 4z&quot; fill=&quot;currentColor&quot; opacity=&quot;.45&quot;/&gt;&lt;/svg&gt;
+        &lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;screen&quot; id=&quot;screen&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;tabbar&quot; role=&quot;tablist&quot; aria-label=&quot;Phone sections&quot;&gt;&lt;button id=&quot;tabNow&quot; class=&quot;on&quot; role=&quot;tab&quot;&gt;Now&lt;/button&gt;&lt;button id=&quot;tabHist&quot; role=&quot;tab&quot;&gt;History&lt;/button&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;caption&quot; id=&quot;caption&quot; aria-live=&quot;polite&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;demo&quot;&gt;
+      &lt;button class=&quot;primary&quot; id=&quot;btnPing&quot;&gt;Send a test ping&lt;/button&gt;
+      &lt;span class=&quot;lbl&quot;&gt;Demo speed&lt;/span&gt;
+      &lt;div class=&quot;seg small&quot; role=&quot;group&quot; aria-label=&quot;Demo speed&quot;&gt;&lt;button id=&quot;sp1&quot;&gt;1x&lt;/button&gt;&lt;button id=&quot;sp5&quot; class=&quot;on&quot;&gt;5x&lt;/button&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/aside&gt;
+&lt;/main&gt;
+
+&lt;div class=&quot;modal-bg&quot; id=&quot;modalBg&quot;&gt;
+  &lt;div class=&quot;modal&quot;&gt;
+    &lt;h3&gt;Check in with Meteor Mite&lt;/h3&gt;
+    &lt;div class=&quot;sub&quot;&gt;Pick how. Nothing is sent until you choose.&lt;/div&gt;
+    &lt;button class=&quot;opt&quot; id=&quot;optSend&quot;&gt;&lt;b&gt;Message their phone&lt;/b&gt;&lt;span&gt;Asks if they&#39;re still reachable.&lt;/span&gt;&lt;/button&gt;
+    &lt;button class=&quot;opt&quot; id=&quot;optCall&quot;&gt;&lt;b&gt;I&#39;ll call them&lt;/b&gt;&lt;span&gt;Marks it in progress.&lt;/span&gt;&lt;/button&gt;
+    &lt;p style=&quot;text-align:right;margin:14px 0 0&quot;&gt;&lt;button id=&quot;optCancel&quot;&gt;Cancel&lt;/button&gt;&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;footer&gt;
+  Assumptions to confirm: the check-in goes through Rook to the responder&#39;s phone (the brief leaves this open), the threshold is &quot;pings down more than half,&quot; and the card never shows household or identity detail.
+  The 4-week views are illustrative projections, not data.
+&lt;/footer&gt;
+
+&lt;script&gt;
+  var $ = function (id) { return document.getElementById(id); };
+
+  // mode: today | proposed.  step: notice | sent | reachable | calling | notnow.  ff: null | ok | relapse
+  var S = { mode: &#39;proposed&#39;, step: &#39;notice&#39;, ff: null, whyOpen: false };
+
+  var MITE_BEFORE = [11, 11, 10, 11], MITE_NOW = 1;
+  var GALE_BEFORE = [13, 13, 12, 13], GALE_NOW = 21;
+  var PROJ = {
+    ok:      { mite: [4, 7, 9, 10], gale: [18, 16, 14, 13] },
+    relapse: { mite: [4, 7, 5, 3],  gale: [18, 17, 19, 20] }
+  };
+
+  function h(v) { return Math.max(3, Math.round(v / 24 * 44)) + &#39;px&#39;; }
+  function bar(v, cls) { return &#39;&lt;i class=&quot;&#39; + (cls || &#39;&#39;) + &#39;&quot; style=&quot;height:&#39; + h(v) + &#39;&quot; title=&quot;&#39; + v + &#39; pings&quot;&gt;&lt;/i&gt;&#39;; }
+
+  function bars(before, now, nowCls, proj, projCls) {
+    var out = before.map(function (v) { return bar(v); }).join(&#39;&#39;) + bar(now, nowCls);
+    if (proj) out += &#39;&lt;i class=&quot;gap&quot;&gt;&lt;/i&gt;&#39; + proj.map(function (v) { return bar(v, projCls); }).join(&#39;&#39;);
+    return &#39;&lt;div class=&quot;bars&quot;&gt;&#39; + out + &#39;&lt;/div&gt;&#39;;
+  }
+
+  function render() {
+    var today = S.mode === &#39;today&#39;;
+    $(&#39;mToday&#39;).className = today ? &#39;on&#39; : &#39;&#39;;
+    $(&#39;mProp&#39;).className = today ? &#39;&#39; : &#39;on&#39;;
+    $(&#39;modeHint&#39;).textContent = today
+      ? &#39;What Kip and Meteor Mite get right now.&#39;
+      : &#39;What they would get with the gone-quiet notice and the way back.&#39;;
+    renderMite(today);
+    renderGale(today);
+    renderPhone(today);
+  }
+
+  function renderMite(today) {
+    var tag, body = &#39;&#39;;
+    if (today) {
+      $(&#39;cardA&#39;).innerHTML =
+        &#39;&lt;div class=&quot;row&quot;&gt;&lt;div&gt;&lt;div class=&quot;name&quot;&gt;Meteor Mite&lt;/div&gt;&lt;div class=&quot;sub&quot;&gt;Eastgate &#183; available&lt;/div&gt;&lt;/div&gt;&#39; +
+        &#39;&lt;span class=&quot;tag wait&quot;&gt;Available&lt;/span&gt;&lt;/div&gt;&#39; +
+        &#39;&lt;div class=&quot;notice plain&quot;&gt;&lt;p&gt;Nothing on this card shows pings dropped from 11 a week to 1.&lt;/p&gt;&lt;/div&gt;&#39;;
+      return;
+    }
+
+    var proj = S.ff ? PROJ[S.ff].mite : null;
+    var chart = bars(MITE_BEFORE, MITE_NOW, &#39;hot&#39;, proj, S.ff === &#39;relapse&#39; ? &#39;projbad&#39; : &#39;proj&#39;);
+    var legend = S.ff
+      ? &#39;&lt;div class=&quot;legend&quot;&gt;Weeks before 4.2, the latest week (orange), then four projected weeks (hatched). Illustrative.&lt;/div&gt;&#39;
+      : &#39;&lt;div class=&quot;sub&quot;&gt;Pings per week: &lt;b&gt;11 → 1&lt;/b&gt;&lt;/div&gt;&#39;;
+    var tagHtml, notice;
+
+    if (S.step === &#39;notice&#39;) {
+      tagHtml = &#39;&lt;span class=&quot;tag quiet&quot;&gt;Gone quiet&lt;/span&gt;&#39;;
+      notice = &#39;&lt;div class=&quot;notice&quot;&gt;&lt;p&gt;&lt;b&gt;Pings have dropped sharply: about 11 a week to 1.&lt;/b&gt;&lt;br&gt;&#39; +
+        &#39;None taken since 19 Aug.&lt;/p&gt;&#39; +
+        &#39;&lt;p&gt;&lt;button class=&quot;primary&quot; id=&quot;btnCheckin&quot;&gt;Check in&lt;/button&gt; &lt;button id=&quot;btnWhy&quot;&gt;Why?&lt;/button&gt;&lt;/p&gt;&#39; +
+        &#39;&lt;div class=&quot;why&quot; id=&quot;whyBox&quot; style=&quot;display:&#39; + (S.whyOpen ? &#39;block&#39; : &#39;none&#39;) + &#39;&quot;&gt;&#39; +
+        &#39;Missed pings lower a responder\&#39;s place in the order, so they\&#39;re offered fewer. Only you can see this.&lt;/div&gt;&lt;/div&gt;&#39;;
+    } else if (S.step === &#39;sent&#39;) {
+      tagHtml = &#39;&lt;span class=&quot;tag wait&quot;&gt;Check-in sent&lt;/span&gt;&#39;;
+      notice = &#39;&lt;div class=&quot;notice&quot;&gt;&lt;p&gt;&lt;b&gt;&#39; + (S.tries &gt; 1 ? &#39;Check-in sent again.&#39; : &#39;Check-in sent.&#39;) + &#39;&lt;/b&gt; Waiting for Meteor Mite to answer.&lt;/p&gt;&#39; +
+        &#39;&lt;p&gt;&lt;button id=&quot;skipAhead&quot;&gt;Demo: no reply after a day&lt;/button&gt;&lt;/p&gt;&lt;/div&gt;&#39;;
+    } else if (S.step === &#39;calling&#39;) {
+      tagHtml = &#39;&lt;span class=&quot;tag wait&quot;&gt;You are calling&lt;/span&gt;&#39;;
+      notice = &#39;&lt;div class=&quot;notice&quot;&gt;&lt;p&gt;&lt;b&gt;Marked as “I\&#39;m calling.”&lt;/b&gt; We\&#39;ll prompt you to record what you found.&lt;/p&gt;&#39; +
+        &#39;&lt;p&gt;&lt;button class=&quot;primary&quot; id=&quot;callDone&quot;&gt;Mark reachable&lt;/button&gt; &lt;button id=&quot;callUnavail&quot;&gt;Not available&lt;/button&gt; &lt;button id=&quot;callNo&quot;&gt;No answer&lt;/button&gt;&lt;/p&gt;&lt;/div&gt;&#39;;
+    } else if (S.step === &#39;noreply&#39;) {
+      tagHtml = &#39;&lt;span class=&quot;tag bad&quot;&gt;No response&lt;/span&gt;&#39;;
+      notice = &#39;&lt;div class=&quot;notice&quot;&gt;&lt;p&gt;&lt;b&gt;No response from Meteor Mite.&lt;/b&gt; &#39; + (S.tries &gt; 1 ? &#39;Tried &#39; + S.tries + &#39; times&#39; : &#39;Tried once&#39;) +
+        (S.how === &#39;call&#39; ? &#39; by phone.&#39; : &#39; by message.&#39;) + &#39;&lt;/p&gt;&lt;p&gt;What next?&lt;/p&gt;&#39; +
+        &#39;&lt;p&gt;&lt;button class=&quot;primary&quot; id=&quot;retry&quot;&gt;Try again&lt;/button&gt; &lt;button id=&quot;checkPhone&quot;&gt;Check their phone&lt;/button&gt; &lt;button id=&quot;pausePings&quot;&gt;Pause pings&lt;/button&gt;&lt;/p&gt;&lt;/div&gt;&#39;;
+    } else if (S.step === &#39;delivery&#39;) {
+      tagHtml = &#39;&lt;span class=&quot;tag wait&quot;&gt;Checking delivery&lt;/span&gt;&#39;;
+      notice = &#39;&lt;div class=&quot;notice plain&quot;&gt;&lt;p&gt;&lt;b&gt;Asked Engineering to check pings are reaching their phone.&lt;/b&gt; The result will show here.&lt;/p&gt;&#39; +
+        &#39;&lt;p&gt;&lt;button id=&quot;pausePings&quot;&gt;Pause pings&lt;/button&gt;&lt;/p&gt;&lt;/div&gt;&#39;;
+    } else if (S.step === &#39;paused&#39;) {
+      tagHtml = &#39;&lt;span class=&quot;tag wait&quot;&gt;Pings paused&lt;/span&gt;&#39;;
+      notice = &#39;&lt;div class=&quot;notice plain&quot;&gt;&lt;p&gt;&lt;b&gt;Pings are paused until Meteor Mite responds.&lt;/b&gt;&lt;/p&gt;&#39; +
+        &#39;&lt;p&gt;&lt;button id=&quot;resumePings&quot;&gt;Resume pings&lt;/button&gt;&lt;/p&gt;&lt;/div&gt;&#39;;
+    } else if (S.step === &#39;unavailable&#39;) {
+      tagHtml = &#39;&lt;span class=&quot;tag wait&quot;&gt;Not available&lt;/span&gt;&#39;;
+      notice = &#39;&lt;div class=&quot;notice&quot;&gt;&lt;p&gt;&lt;b&gt;Meteor Mite is not available.&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set their availability or try again later.&lt;/p&gt;&lt;/div&gt;&#39;;
+    } else if (S.step === &#39;notnow&#39;) {
+      tagHtml = &#39;&lt;span class=&quot;tag wait&quot;&gt;Not available&lt;/span&gt;&#39;;
+      notice = &#39;&lt;div class=&quot;notice&quot;&gt;&lt;p&gt;&lt;b&gt;Meteor Mite said not right now.&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Set their availability or try again later.&lt;/p&gt;&lt;/div&gt;&#39;;
+    } else { // reachable
+      if (S.ff === &#39;relapse&#39;) {
+        tagHtml = &#39;&lt;span class=&quot;tag bad&quot;&gt;Pings back, still missing&lt;/span&gt;&#39;;
+        notice = &#39;&lt;div class=&quot;notice bad&quot;&gt;&lt;p&gt;&lt;b&gt;Pings came back, then dropped again.&lt;/b&gt; Most went unanswered.&lt;/p&gt;&lt;/div&gt;&#39;;
+      } else if (S.ff === &#39;ok&#39;) {
+        tagHtml = &#39;&lt;span class=&quot;tag ok&quot;&gt;Back to normal&lt;/span&gt;&#39;;
+        notice = &#39;&lt;div class=&quot;notice done&quot;&gt;&lt;p&gt;&lt;b&gt;Pings are back to about their old level.&lt;/b&gt;&lt;/p&gt;&#39; +
+          &#39;&lt;p&gt;Nobody changed a setting. The Gale\&#39;s load came down as Meteor Mite\&#39;s pings returned.&lt;/p&gt;&lt;/div&gt;&#39;;
+      } else {
+        tagHtml = &#39;&lt;span class=&quot;tag ok&quot;&gt;Reachable&lt;/span&gt;&#39;;
+        notice = &#39;&lt;div class=&quot;notice done&quot;&gt;&lt;p&gt;&lt;b&gt;Meteor Mite says they\&#39;re reachable.&lt;/b&gt;&lt;/p&gt;&#39; +
+          &#39;&lt;p&gt;Their pings should build back up on their own.&lt;/p&gt;&#39; +
+          &#39;&lt;div class=&quot;ff&quot;&gt;&lt;b&gt;See the next four weeks&lt;/b&gt;&#39; +
+          &#39;&lt;div class=&quot;btns&quot;&gt;&lt;button id=&quot;ffOk&quot;&gt;If they answer in time&lt;/button&gt;&lt;button id=&quot;ffBad&quot;&gt;If they still miss most pings&lt;/button&gt;&lt;/div&gt;&#39; +
+          &#39;&lt;div class=&quot;legend&quot;&gt;Illustrative projections, not data.&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&#39;;
+      }
+    }
+
+    $(&#39;cardA&#39;).innerHTML =
+      &#39;&lt;div class=&quot;row&quot;&gt;&lt;div&gt;&lt;div class=&quot;name&quot;&gt;Meteor Mite&lt;/div&gt;&lt;div class=&quot;sub&quot;&gt;Eastgate &#183; available&lt;/div&gt;&lt;/div&gt;&#39; + tagHtml + &#39;&lt;/div&gt;&#39; +
+      chart + legend + notice;
+    wire();
+  }
+
+  function renderGale(today) {
+    if (today) {
+      $(&#39;cardB&#39;).innerHTML =
+        &#39;&lt;div class=&quot;row&quot;&gt;&lt;div&gt;&lt;div class=&quot;name&quot;&gt;The Gale&lt;/div&gt;&lt;div class=&quot;sub&quot;&gt;Eastgate &#183; available&lt;/div&gt;&lt;/div&gt;&#39; +
+        &#39;&lt;span class=&quot;tag wait&quot;&gt;Available&lt;/span&gt;&lt;/div&gt;&#39; +
+        &#39;&lt;div class=&quot;notice plain&quot;&gt;&lt;p&gt;Nothing on this card shows pings rose from 13 to 21 a week.&lt;/p&gt;&lt;/div&gt;&#39;;
+      return;
+    }
+    var proj = S.ff ? PROJ[S.ff].gale : null;
+    var tag = S.ff === &#39;ok&#39; ? &#39;&lt;span class=&quot;tag ok&quot;&gt;Load easing&lt;/span&gt;&#39; :
+              S.ff === &#39;relapse&#39; ? &#39;&lt;span class=&quot;tag load&quot;&gt;Still carrying extra load&lt;/span&gt;&#39; :
+              &#39;&lt;span class=&quot;tag load&quot;&gt;Carrying extra load&lt;/span&gt;&#39;;
+    var sub = S.ff
+      ? &#39;&lt;div class=&quot;legend&quot;&gt;Weeks before 4.2, the latest week (blue), then four projected weeks (hatched). Illustrative.&lt;/div&gt;&#39;
+      : &#39;&lt;div class=&quot;sub&quot;&gt;Pings per week: about 13 before 4.2, 21 in the latest week of data. Some of these are pings Meteor Mite would normally get.&lt;/div&gt;&#39;;
+    $(&#39;cardB&#39;).innerHTML =
+      &#39;&lt;div class=&quot;row&quot;&gt;&lt;div&gt;&lt;div class=&quot;name&quot;&gt;The Gale&lt;/div&gt;&lt;div class=&quot;sub&quot;&gt;Eastgate &#183; available&lt;/div&gt;&lt;/div&gt;&#39; + tag + &#39;&lt;/div&gt;&#39; +
+      bars(GALE_BEFORE, GALE_NOW, &#39;blue&#39;, proj, &#39;projblue&#39;) + sub;
+  }
+
+  // --- Ping countdown (demo). The real ping wait is 60 seconds. ---
+  var PING_WAIT = 60, pingTimer = null, pingLeft = PING_WAIT, pingStart = 0, pingSpeed = 5, pingSaved = PING_WAIT;
+
+  function curLeft() { return Math.max(0, pingLeft - (Date.now() - pingStart) / 1000 * pingSpeed); }
+  function stopPing() { if (pingTimer) { clearInterval(pingTimer); pingTimer = null; } }
+  function startPing(left) {
+    stopPing(); pingLeft = left; pingStart = Date.now(); S.ping = &#39;live&#39;; phoneTab = &#39;now&#39;;
+    pingTimer = setInterval(function () {
+      if (curLeft() &lt;= 0) { stopPing(); histAdd(&#39;ping&#39;, &#39;Missed&#39;, &#39;bad&#39;); S.ping = &#39;missed&#39;; render(); } else { paintPing(curLeft()); }
+    }, 100);
+    render();
+  }
+  function paintPing(left) {
+    var n = $(&#39;ringNum&#39;), p = $(&#39;ringPrg&#39;), r = $(&#39;ring&#39;);
+    if (n) n.textContent = Math.ceil(left);
+    if (p) p.style.strokeDashoffset = (282.7 * (1 - left / PING_WAIT)).toFixed(1);
+    if (r) r.className = &#39;ring &#39; + (left &lt;= 10 ? &#39;late&#39; : left &lt;= 20 ? &#39;warn&#39; : &#39;ok&#39;);
+  }
+
+  function renderPing(scr, cap, today) {
+    var back = &#39;&lt;div class=&quot;undo&quot;&gt;&lt;button id=&quot;pgDone&quot;&gt;Done&lt;/button&gt;&lt;/div&gt;&#39;;
+    if (S.ping === &#39;live&#39;) {
+      scr.innerHTML = &#39;&lt;div class=&quot;time&quot;&gt;9:41&lt;/div&gt;&#39; +
+        &#39;&lt;div class=&quot;msg ping&quot;&gt;&lt;b&gt;New callout&lt;/b&gt;&lt;span class=&quot;sub2&quot;&gt;Eastgate &#183; needs a response&lt;/span&gt;&#39; +
+        &#39;&lt;div class=&quot;ring ok&quot; id=&quot;ring&quot;&gt;&lt;svg viewBox=&quot;0 0 100 100&quot;&gt;&lt;circle class=&quot;trk&quot; cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;45&quot;/&gt;&#39; +
+        &#39;&lt;circle class=&quot;prg&quot; id=&quot;ringPrg&quot; cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;45&quot; transform=&quot;rotate(-90 50 50)&quot; style=&quot;stroke-dashoffset:0&quot;/&gt;&lt;/svg&gt;&#39; +
+        &#39;&lt;div class=&quot;rtxt&quot;&gt;&lt;b id=&quot;ringNum&quot;&gt;60&lt;/b&gt;&lt;span&gt;seconds&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&#39; +
+        &#39;&lt;button class=&quot;primary&quot; id=&quot;pgTake&quot;&gt;Take it&lt;/button&gt;&lt;button id=&quot;pgNo&quot;&gt;Turn down&lt;/button&gt;&lt;/div&gt;&#39;;
+      paintPing(curLeft());
+      cap.textContent = pingSpeed === 1 ? &#39;Real speed: you have 60 seconds.&#39; : &#39;Demo at &#39; + pingSpeed + &#39;x. The real wait is 60 seconds.&#39;;
+      $(&#39;pgTake&#39;).onclick = function () { stopPing(); histAdd(&#39;ping&#39;, &#39;Taken&#39;, &#39;ok&#39;); S.ping = &#39;taken&#39;; render(); };
+      $(&#39;pgNo&#39;).onclick = function () { pingSaved = curLeft(); stopPing(); histAdd(&#39;ping&#39;, &#39;Turned down&#39;, &#39;&#39;); S.ping = &#39;declined&#39;; render(); };
+    } else if (S.ping === &#39;taken&#39;) {
+      scr.innerHTML = &#39;&lt;div class=&quot;time&quot;&gt;9:41&lt;/div&gt;&lt;div class=&quot;idle&quot;&gt;&lt;b&gt;You took it.&lt;/b&gt;&lt;br&gt;The callout is yours.&lt;/div&gt;&#39; + back;
+      cap.textContent = &#39;Taken.&#39;;
+    } else if (S.ping === &#39;declined&#39;) {
+      scr.innerHTML = &#39;&lt;div class=&quot;time&quot;&gt;9:41&lt;/div&gt;&lt;div class=&quot;idle&quot;&gt;&lt;b&gt;Turned down.&lt;/b&gt;&lt;br&gt;It went to the next responder.&lt;/div&gt;&#39; +
+        &#39;&lt;div class=&quot;undo&quot;&gt;Tapped by mistake? &lt;button id=&quot;pgUndo&quot;&gt;Undo&lt;/button&gt; &lt;button id=&quot;pgDone&quot;&gt;Done&lt;/button&gt;&lt;/div&gt;&#39;;
+      cap.textContent = &#39;Undo puts the ping back with the time you had left.&#39;;
+      $(&#39;pgUndo&#39;).onclick = function () { histPop(); startPing(pingSaved); };
+    } else { // missed
+      scr.innerHTML = &#39;&lt;div class=&quot;time&quot;&gt;9:41&lt;/div&gt;&lt;div class=&quot;idle&quot;&gt;&lt;b&gt;Missed.&lt;/b&gt;&lt;br&gt;It went to the next responder.&lt;br&gt;&lt;br&gt;&#39; +
+        (today ? &#39;Missed pings lower your place in the order.&#39; : &#39;We\&#39;ll check in before a miss costs you pings.&#39;) + &#39;&lt;/div&gt;&#39; + back;
+      cap.textContent = today ? &#39;Today: a miss counts like a turn-down.&#39; : &#39;Proposed: your handler is told and can check in.&#39;;
+    }
+    if ($(&#39;pgDone&#39;)) $(&#39;pgDone&#39;).onclick = function () { S.ping = null; render(); };
+  }
+
+  // --- Phone history: what the responder has answered before. Seed entries are illustrative. ---
+  var phoneTab = &#39;now&#39;;
+  var HIST_SEED = [
+    { kind: &#39;checkin&#39;, when: &#39;Tue 6 Oct&#39;,  ans: &#39;Yes, I\&#39;m reachable&#39;, tone: &#39;ok&#39; },
+    { kind: &#39;ping&#39;,    when: &#39;Tue 6 Oct&#39;,  ans: &#39;Taken&#39;,               tone: &#39;ok&#39; },
+    { kind: &#39;checkin&#39;, when: &#39;Mon 28 Sep&#39;, ans: &#39;Not right now&#39;,       tone: &#39;&#39; },
+    { kind: &#39;ping&#39;,    when: &#39;Mon 28 Sep&#39;, ans: &#39;Missed&#39;,              tone: &#39;bad&#39; }
+  ];
+  var HIST_TITLE = { checkin: &#39;Check-in from your handler&#39;, ping: &#39;Callout ping&#39;, call: &#39;Call from your handler&#39; };
+  var hist = [];
+  function histAdd(kind, ans, tone) { hist.unshift({ kind: kind, when: &#39;Just now&#39;, ans: ans, tone: tone }); }
+  function histPop() { hist.shift(); }
+
+  function renderHistory(scr, cap) {
+    var rows = hist.concat(HIST_SEED).map(function (e) {
+      return &#39;&lt;div class=&quot;hrow&quot;&gt;&lt;div&gt;&lt;b&gt;&#39; + HIST_TITLE[e.kind] + &#39;&lt;/b&gt;&lt;small&gt;&#39; + e.when + &#39;&lt;/small&gt;&lt;/div&gt;&#39; +
+             &#39;&lt;span class=&quot;chip &#39; + e.tone + &#39;&quot;&gt;&#39; + e.ans + &#39;&lt;/span&gt;&lt;/div&gt;&#39;;
+    }).join(&#39;&#39;);
+    scr.innerHTML = &#39;&lt;div class=&quot;hh&quot;&gt;History&lt;/div&gt;&lt;div class=&quot;hlist&quot;&gt;&#39; + rows + &#39;&lt;/div&gt;&#39; +
+      &#39;&lt;div class=&quot;hnote&quot;&gt;Older entries are examples for the demo.&lt;/div&gt;&#39;;
+    cap.textContent = &#39;Your past check-ins and pings, newest first.&#39;;
+  }
+
+  function renderPhone(today) {
+    var scr = $(&#39;screen&#39;), cap = $(&#39;caption&#39;);
+    $(&#39;tabNow&#39;).className = phoneTab === &#39;now&#39; ? &#39;on&#39; : &#39;&#39;;
+    $(&#39;tabHist&#39;).className = phoneTab === &#39;history&#39; ? &#39;on&#39; : &#39;&#39;;
+    if (phoneTab === &#39;history&#39;) { renderHistory(scr, cap); return; }
+    if (S.ping) { renderPing(scr, cap, today); return; }
+    if (today) {
+      scr.innerHTML = &#39;&lt;div class=&quot;time&quot;&gt;9:41&lt;/div&gt;&lt;div class=&quot;idle&quot;&gt;Nothing new.&lt;/div&gt;&#39;;
+      cap.textContent = &#39;Today: nothing reaches them, and nothing tells them why.&#39;;
+      return;
+    }
+    if (S.step === &#39;paused&#39;) {
+      scr.innerHTML = &#39;&lt;div class=&quot;time&quot;&gt;9:42&lt;/div&gt;&#39; +
+        &#39;&lt;div class=&quot;msg&quot;&gt;&lt;b&gt;Pings are paused&lt;/b&gt;Your handler paused them because they couldn\&#39;t reach you.&#39; +
+        &#39;&lt;button class=&quot;primary&quot; id=&quot;phBack&quot;&gt;I\&#39;m back&lt;/button&gt;&lt;/div&gt;&#39;;
+      cap.textContent = &#39;This is the responder\&#39;s way back.&#39;;
+      $(&#39;phBack&#39;).onclick = function () { histAdd(&#39;checkin&#39;, &#39;Yes, I\&#39;m reachable&#39;, &#39;ok&#39;); S.step = &#39;reachable&#39;; render(); };
+    } else if (S.step === &#39;sent&#39; || (S.step === &#39;noreply&#39; &amp;&amp; S.how === &#39;message&#39;)) {
+      var again = S.step === &#39;noreply&#39; || S.tries &gt; 1;
+      scr.innerHTML = &#39;&lt;div class=&quot;time&quot;&gt;9:42&lt;/div&gt;&#39; +
+        &#39;&lt;div class=&quot;msg&quot;&gt;&lt;b&gt;&#39; + (again ? &#39;Reminder: still reachable?&#39; : &#39;You\&#39;ve missed some pings&#39;) + &#39;&lt;/b&gt;&#39; + (again ? &#39;You\&#39;ve missed some pings.&#39; : &#39;Still reachable?&#39;) +
+        &#39;&lt;button class=&quot;primary&quot; id=&quot;phYes&quot;&gt;Yes, I\&#39;m reachable&lt;/button&gt;&#39; +
+        &#39;&lt;button id=&quot;phNo&quot;&gt;Not right now&lt;/button&gt;&lt;/div&gt;&#39;;
+      cap.textContent = &#39;Your turn: answer as the responder.&#39;;
+      $(&#39;phYes&#39;).onclick = function () { histAdd(&#39;checkin&#39;, &#39;Yes, I\&#39;m reachable&#39;, &#39;ok&#39;); S.step = &#39;reachable&#39;; render(); };
+      $(&#39;phNo&#39;).onclick = function () { histAdd(&#39;checkin&#39;, &#39;Not right now&#39;, &#39;&#39;); S.step = &#39;notnow&#39;; render(); };
+    } else if (S.step === &#39;reachable&#39;) {
+      var msg = S.ff === &#39;relapse&#39; ? &#39;Pings are back, but some went unanswered.&#39; :
+                S.ff === &#39;ok&#39; ? &#39;Pings are coming through again.&#39; :
+                &#39;&lt;b&gt;Thanks.&lt;/b&gt;&lt;br&gt;You should start getting pings again.&#39;;
+      scr.innerHTML = &#39;&lt;div class=&quot;time&quot;&gt;9:43&lt;/div&gt;&lt;div class=&quot;idle&quot;&gt;&#39; + msg + &#39;&lt;/div&gt;&#39;;
+      cap.textContent = &#39;Handler card updated.&#39;;
+    } else if (S.step === &#39;unavailable&#39;) {
+      scr.innerHTML = &#39;&lt;div class=&quot;time&quot;&gt;9:43&lt;/div&gt;&lt;div class=&quot;idle&quot;&gt;Got it. We\&#39;ll ask again later.&lt;/div&gt;&#39; +
+        &#39;&lt;div class=&quot;undo&quot;&gt;Tapped by mistake? &lt;button id=&quot;phUndo&quot;&gt;Undo&lt;/button&gt;&lt;/div&gt;&#39;;
+      cap.textContent = &#39;The undo covers a wrong tap (one support ticket asked for this).&#39;;
+      $(&#39;phUndo&#39;).onclick = function () { histPop(); S.step = &#39;sent&#39;; render(); };
+    } else if (S.step === &#39;notnow&#39;) {
+      scr.innerHTML = &#39;&lt;div class=&quot;time&quot;&gt;9:43&lt;/div&gt;&lt;div class=&quot;idle&quot;&gt;Got it. We\&#39;ll ask again later.&lt;/div&gt;&#39; +
+        &#39;&lt;div class=&quot;undo&quot;&gt;Tapped by mistake? &lt;button id=&quot;phUndo&quot;&gt;Undo&lt;/button&gt;&lt;/div&gt;&#39;;
+      cap.textContent = &#39;The undo covers a wrong tap (one support ticket asked for this).&#39;;
+      $(&#39;phUndo&#39;).onclick = function () { histPop(); S.step = &#39;sent&#39;; render(); };
+    } else {
+      scr.innerHTML = &#39;&lt;div class=&quot;time&quot;&gt;9:41&lt;/div&gt;&lt;div class=&quot;idle&quot;&gt;Nothing new.&lt;/div&gt;&#39;;
+      cap.textContent = S.step === &#39;calling&#39; ? &#39;Kip is calling them.&#39; : &#39;Click “Check in” on the console to see what lands here.&#39;;
+    }
+  }
+
+  function wire() {
+    if ($(&#39;btnWhy&#39;)) $(&#39;btnWhy&#39;).onclick = function () { S.whyOpen = !S.whyOpen; render(); };
+    if ($(&#39;btnCheckin&#39;)) $(&#39;btnCheckin&#39;).onclick = function () { $(&#39;modalBg&#39;).style.display = &#39;flex&#39;; };
+    if ($(&#39;callDone&#39;)) $(&#39;callDone&#39;).onclick = function () { histAdd(&#39;call&#39;, &#39;Reachable&#39;, &#39;ok&#39;); S.step = &#39;reachable&#39;; render(); };
+    if ($(&#39;skipAhead&#39;)) $(&#39;skipAhead&#39;).onclick = function () { S.how = &#39;message&#39;; histAdd(&#39;checkin&#39;, &#39;No response&#39;, &#39;bad&#39;); S.step = &#39;noreply&#39;; render(); };
+    if ($(&#39;callNo&#39;)) $(&#39;callNo&#39;).onclick = function () { S.how = &#39;call&#39;; S.step = &#39;noreply&#39;; render(); };
+    if ($(&#39;retry&#39;)) $(&#39;retry&#39;).onclick = function () {
+      S.tries = (S.tries || 1) + 1;
+      if (S.how === &#39;call&#39;) { S.step = &#39;calling&#39;; } else { histPop(); S.step = &#39;sent&#39;; phoneTab = &#39;now&#39;; }
+      render();
+    };
+    if ($(&#39;checkPhone&#39;)) $(&#39;checkPhone&#39;).onclick = function () { S.step = &#39;delivery&#39;; render(); };
+    if ($(&#39;pausePings&#39;)) $(&#39;pausePings&#39;).onclick = function () { S.step = &#39;paused&#39;; render(); };
+    if ($(&#39;resumePings&#39;)) $(&#39;resumePings&#39;).onclick = function () { S.step = &#39;notice&#39;; render(); };
+    if ($(&#39;callUnavail&#39;)) $(&#39;callUnavail&#39;).onclick = function () { histAdd(&#39;call&#39;, &#39;Not available&#39;, &#39;&#39;); S.step = &#39;unavailable&#39;; render(); };
+    if ($(&#39;ffOk&#39;)) $(&#39;ffOk&#39;).onclick = function () { S.ff = &#39;ok&#39;; render(); };
+    if ($(&#39;ffBad&#39;)) $(&#39;ffBad&#39;).onclick = function () { S.ff = &#39;relapse&#39;; render(); };
+  }
+
+  $(&#39;optCancel&#39;).onclick = function () { $(&#39;modalBg&#39;).style.display = &#39;none&#39;; };
+  $(&#39;optSend&#39;).onclick = function () { $(&#39;modalBg&#39;).style.display = &#39;none&#39;; S.step = &#39;sent&#39;; S.how = &#39;message&#39;; S.tries = 1; phoneTab = &#39;now&#39;; render(); };
+  $(&#39;tabNow&#39;).onclick = function () { phoneTab = &#39;now&#39;; render(); };
+  $(&#39;tabHist&#39;).onclick = function () { phoneTab = &#39;history&#39;; render(); };
+  $(&#39;optCall&#39;).onclick = function () { $(&#39;modalBg&#39;).style.display = &#39;none&#39;; S.step = &#39;calling&#39;; S.how = &#39;call&#39;; S.tries = 1; render(); };
+  $(&#39;mToday&#39;).onclick = function () { S.mode = &#39;today&#39;; render(); };
+  $(&#39;mProp&#39;).onclick = function () { S.mode = &#39;proposed&#39;; render(); };
+  $(&#39;btnReset&#39;).onclick = function () { stopPing(); hist = []; phoneTab = &#39;now&#39;; S ={ mode: S.mode, step: &#39;notice&#39;, ff: null, whyOpen: false }; render(); };
+  $(&#39;btnPing&#39;).onclick = function () { startPing(PING_WAIT); };
+  function setSpeed(x) {
+    if (S.ping === &#39;live&#39;) { pingLeft = curLeft(); pingStart = Date.now(); }
+    pingSpeed = x;
+    $(&#39;sp1&#39;).className = x === 1 ? &#39;on&#39; : &#39;&#39;; $(&#39;sp5&#39;).className = x === 5 ? &#39;on&#39; : &#39;&#39;;
+    if (S.ping === &#39;live&#39;) render();
+  }
+  $(&#39;sp1&#39;).onclick = function () { setSpeed(1); };
+  $(&#39;sp5&#39;).onclick = function () { setSpeed(5); };
+
+  render();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe>
     </div>
     <div class="grid g2" style="gap:28px;align-items:start;margin-top:26px">
       <div>
@@ -404,7 +1009,7 @@ Turn that into a skill called review-checklist, so I can point it at any brief a
         <div class="box" style="padding:14px 16px;font-size:15px"><b>Build order I'd take to Helen and Marcus:</b> (1) misses neutral or a small penalty plus a one-time reset, (2) scores ease back toward neutral, (3) confirm push delivery, add an undo, (4) log answer time, rank and delivery with a per-responder drop alert, (5) only then tune the wait. One change per release.</div>
       </div>
     </div>
-    <p class="src">Not agreed yet: Wen Li and Marcus must size the penalty and decay, and say whether pausing pings and a delivery check are allowed. If the frame is blank, open <code>05-super-speed/prototype.html</code> directly.</p>
+    <p class="src">Not agreed yet: Wen Li and Marcus must size the penalty and decay, and say whether pausing pings and a delivery check are allowed. The prototype is embedded in this file, so it works anywhere.</p>
   </div>
 </section>
 

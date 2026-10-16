@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rook Dispatch console — "gone quiet" prototype</title>
+<style>
+
+  :root {
+    --ink:#111827; --ink-2:#374151; --mute:#5b6475; --line:#e5e7eb; --bg:#f3f4f8; --card:#ffffff;
+    --blue:#2563eb; --blue-d:#1d4ed8; --blue-bg:#eff4ff;
+    --amber:#92400e; --amber-bg:#fffbeb; --amber-line:#fcd9a0; --amber-dot:#f59e0b;
+    --green:#065f46; --green-bg:#ecfdf5; --green-line:#a7e3c7; --green-dot:#10b981;
+    --red:#991b1b; --red-bg:#fef2f2; --red-line:#f5c2c2; --red-dot:#ef4444;
+    --grey-bg:#f3f4f6; --grey-line:#e5e7eb; --grey-dot:#9ca3af;
+    --r-sm:8px; --r-md:12px; --r-lg:16px;
+    --shadow:0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.06);
+    --shadow-lg:0 12px 32px rgba(16,24,40,.18);
+  }
+  * { box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
+  body { margin:0; font:14px/1.5 Inter,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif; color:var(--ink); background:var(--bg); -webkit-font-smoothing:antialiased; }
+
+  /* App bar */
+  header { background:#0f172a; color:#fff; padding:0 24px; height:56px; display:flex; justify-content:space-between; align-items:center; }
+  header b { font-size:15px; font-weight:600; letter-spacing:.1px; display:flex; align-items:center; gap:10px; }
+  header b::before { content:""; width:22px; height:22px; border-radius:6px; background:linear-gradient(135deg,#60a5fa,#2563eb); display:inline-block; }
+  header span { color:#cbd5e1; font-size:13px; display:flex; align-items:center; gap:8px; }
+  header span::before { content:"K"; width:26px; height:26px; border-radius:50%; background:#334155; color:#fff; font-size:12px; font-weight:600; display:inline-flex; align-items:center; justify-content:center; }
+  .banner { background:#fffbeb; color:#78350f; padding:8px 24px; font-size:12px; border-bottom:1px solid #fde68a; text-align:center; }
+
+  /* Toolbar */
+  .toolbar { max-width:1120px; margin:20px auto 0; padding:0 24px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .seg { display:inline-flex; padding:3px; border-radius:10px; background:#e5e7eb; }
+  .seg button { border:0; border-radius:8px; padding:7px 18px; background:transparent; color:var(--ink-2); font-weight:500; min-height:34px; }
+  .seg button.on { background:#fff; color:var(--ink); font-weight:600; box-shadow:var(--shadow); }
+  .toolbar .hint { color:var(--mute); font-size:13px; margin-left:auto; }
+  #btnReset { border:0; background:transparent; color:var(--mute); padding:7px 10px; }
+  #btnReset:hover { color:var(--ink); background:#e5e7eb; filter:none; }
+
+  /* Layout */
+  main { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:32px; padding:20px 24px 32px; max-width:1120px; margin:0 auto; }
+  h2 { margin:0 0 12px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--mute); }
+
+  /* Responder cards */
+  .card { background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg); padding:20px; margin-bottom:16px; box-shadow:var(--shadow); }
+  .row { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .row > div:first-child { position:relative; padding-left:52px; min-height:40px; }
+  .row > div:first-child::before { position:absolute; left:0; top:0; width:40px; height:40px; border-radius:50%; background:#e0e7ff; color:#3730a3; font-weight:600; font-size:13px; display:flex; align-items:center; justify-content:center; }
+  #cardA .row > div:first-child::before { content:"MM"; }
+  #cardB .row > div:first-child::before { content:"TG"; background:#dbeafe; color:#1e40af; }
+  .name { font-weight:600; font-size:16px; line-height:1.3; } .sub { color:var(--mute); font-size:13px; }
+
+  /* Status chips */
+  .tag { display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:3px 10px 3px 8px; border-radius:999px; font-weight:600; white-space:nowrap; border:1px solid transparent; }
+  .tag::before { content:""; width:7px; height:7px; border-radius:50%; background:currentColor; }
+  .tag.quiet { background:var(--amber-bg); color:var(--amber); border-color:var(--amber-line); }
+  .tag.load { background:var(--blue-bg); color:#1e40af; border-color:#c7d7fb; }
+  .tag.ok { background:var(--green-bg); color:var(--green); border-color:var(--green-line); }
+  .tag.wait { background:var(--grey-bg); color:var(--ink-2); border-color:var(--grey-line); }
+  .tag.bad { background:var(--red-bg); color:var(--red); border-color:var(--red-line); }
+
+  /* Chart */
+  .bars { display:flex; align-items:flex-end; gap:6px; height:52px; margin:16px 0 6px; padding-bottom:1px; border-bottom:1px solid var(--line); }
+  .bars i { width:22px; background:#d5dbe8; border-radius:4px 4px 0 0; display:block; }
+  .bars i.hot { background:var(--amber-dot); } .bars i.blue { background:var(--blue); }
+  .bars i.proj { background:repeating-linear-gradient(45deg,#6ee7b7,#6ee7b7 4px,#c7f3e0 4px,#c7f3e0 8px); }
+  .bars i.projbad { background:repeating-linear-gradient(45deg,#fca5a5,#fca5a5 4px,#fde0e0 4px,#fde0e0 8px); }
+  .bars i.projblue { background:repeating-linear-gradient(45deg,#93b4f8,#93b4f8 4px,#dbe6fd 4px,#dbe6fd 8px); }
+  .bars .gap { width:10px; background:none; }
+  .legend { color:var(--mute); font-size:12px; margin-top:4px; }
+  .sub b { color:var(--ink); font-size:14px; }
+
+  /* Notices */
+  .notice { background:var(--amber-bg); border:1px solid var(--amber-line); border-left:4px solid var(--amber-dot); border-radius:var(--r-md); padding:14px 16px; margin-top:16px; animation:rise .18s ease-out; }
+  .notice.done { background:var(--green-bg); border-color:var(--green-line); border-left-color:var(--green-dot); }
+  .notice.bad { background:var(--red-bg); border-color:var(--red-line); border-left-color:var(--red-dot); }
+  .notice.plain { background:var(--grey-bg); border-color:var(--grey-line); border-left-color:var(--grey-dot); color:var(--ink-2); }
+  .notice p { margin:0 0 12px; } .notice p:last-child { margin:0; }
+  .notice b { font-weight:600; }
+  @keyframes rise { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+  .why { display:none; margin-top:12px; padding:10px 12px; background:#fff; border:1px solid var(--amber-line); border-radius:var(--r-sm); font-size:13px; color:var(--ink-2); }
+  .ff { margin-top:16px; padding-top:16px; border-top:1px solid var(--green-line); }
+  .ff .btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+
+  /* Buttons: primary / secondary / ghost */
+  button { font:inherit; font-weight:500; cursor:pointer; border-radius:var(--r-sm); padding:8px 14px; min-height:36px; border:1px solid #cbd2dd; background:#fff; color:var(--ink); transition:background .12s, border-color .12s, box-shadow .12s; }
+  button:hover { background:#f8fafc; border-color:#b6bfce; }
+  button:active { transform:translateY(1px); }
+  button.primary { background:var(--blue); border-color:var(--blue); color:#fff; font-weight:600; box-shadow:0 1px 2px rgba(37,99,235,.35); }
+  button.primary:hover { background:var(--blue-d); border-color:var(--blue-d); }
+  #btnWhy, #optCancel { border-color:transparent; background:transparent; color:var(--ink-2); }
+  #btnWhy:hover, #optCancel:hover { background:rgba(0,0,0,.05); }
+  button:focus-visible, select:focus-visible { outline:3px solid #93c5fd; outline-offset:2px; }
+
+  /* Modal */
+  .modal-bg { display:none; position:fixed; inset:0; background:rgba(15,23,42,.5); align-items:center; justify-content:center; padding:16px; }
+  .modal { background:#fff; border-radius:var(--r-lg); padding:24px; width:440px; max-width:100%; box-shadow:var(--shadow-lg); animation:rise .18s ease-out; }
+  .modal h3 { margin:0 0 4px; font-size:18px; }
+  .opt { display:block; width:100%; text-align:left; margin-top:12px; padding:14px 16px; border-radius:var(--r-md); min-height:0; }
+  .opt:hover { border-color:var(--blue); background:var(--blue-bg); }
+  .opt b { display:block; font-weight:600; } .opt span { color:var(--mute); font-size:13px; font-weight:400; }
+
+  /* Phone */
+  .phonewrap { position:sticky; top:16px; align-self:start; }
+  .phone { width:300px; margin:0 auto; background:#0b1020; border-radius:40px; padding:12px; box-shadow:var(--shadow-lg); position:relative; }
+  .phone::before { content:""; position:absolute; top:20px; left:50%; width:84px; height:22px; margin-left:-42px; background:#0b1020; border-radius:12px; z-index:2; }
+  .screen { background:linear-gradient(#eef1f8,#f8f9fc); border-radius:30px; min-height:500px; padding:44px 14px 18px; display:flex; flex-direction:column; }
+  .screen .time { font-size:34px; font-weight:300; text-align:center; color:var(--ink); margin-bottom:20px; letter-spacing:-.5px; }
+  .idle { margin:auto; text-align:center; color:var(--mute); font-size:15px; padding:0 12px; }
+  .idle b { color:var(--ink); }
+  .msg { background:rgba(255,255,255,.95); border:1px solid var(--line); border-radius:18px; padding:14px 16px; box-shadow:var(--shadow); color:var(--ink-2); animation:rise .2s ease-out; }
+  .msg::before { content:"ROOK DISPATCH"; display:block; font-size:10px; font-weight:600; letter-spacing:.08em; color:var(--mute); margin-bottom:6px; }
+  .msg b { display:block; font-size:16px; color:var(--ink); margin-bottom:2px; }
+  .msg button { width:100%; margin-top:10px; min-height:42px; }
+  .undo { margin-top:auto; font-size:13px; color:var(--mute); text-align:center; padding-top:16px; }
+  .undo button { font-size:13px; padding:4px 10px; min-height:30px; margin-left:4px; }
+  .caption { text-align:center; color:var(--mute); font-size:13px; margin-top:14px; min-height:20px; }
+
+  /* Notice icons */
+  .notice { position:relative; padding-left:48px; }
+  .notice::before { content:""; position:absolute; left:16px; top:15px; width:20px; height:20px; background-repeat:no-repeat; background-size:20px 20px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b45309' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/%3E%3C/svg%3E"); }
+  .notice.done::before { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23059669' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m8 12 3 3 5-6'/%3E%3C/svg%3E"); }
+  .notice.bad::before { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dc2626' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4m0 4h.01'/%3E%3C/svg%3E"); }
+  .notice.plain::before { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4m0-4h.01'/%3E%3C/svg%3E"); }
+
+  /* Check-in option icons */
+  .opt { position:relative; padding-left:54px; }
+  .opt::before { content:""; position:absolute; left:18px; top:16px; width:22px; height:22px; background-repeat:no-repeat; background-size:22px 22px; }
+  #optSend::before { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E"); }
+  #optCall::before { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z'/%3E%3C/svg%3E"); }
+
+  /* Phone status bar */
+  .statusbar { position:absolute; top:12px; left:12px; right:12px; height:40px; padding:6px 26px 0; display:flex; justify-content:space-between; align-items:center; z-index:3; color:var(--ink); font-size:14px; font-weight:600; pointer-events:none; }
+  .statusbar .sb-icons { display:flex; align-items:center; gap:6px; }
+  .statusbar svg { display:block; height:12px; width:auto; }
+
+  /* Ping countdown */
+  .demo { display:flex; justify-content:center; align-items:center; gap:10px; margin-top:16px; flex-wrap:wrap; }
+  .demo .lbl { font-size:12px; color:var(--mute); }
+  .seg.small button { padding:4px 12px; min-height:28px; font-size:13px; }
+  .msg.ping { text-align:center; }
+  .msg.ping .sub2 { color:var(--mute); font-size:13px; }
+  .ring { position:relative; width:124px; height:124px; margin:14px auto 8px; }
+  .ring svg { width:100%; height:100%; display:block; }
+  .ring .trk { fill:none; stroke:#e5e7eb; stroke-width:8; }
+  .ring .prg { fill:none; stroke:var(--blue); stroke-width:8; stroke-linecap:round; stroke-dasharray:282.7; transition:stroke .25s; }
+  .ring.warn .prg { stroke:var(--amber-dot); } .ring.late .prg { stroke:var(--red-dot); }
+  .ring .rtxt { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; }
+  .ring .rtxt b { font-size:34px; font-weight:700; margin:0; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .ring .rtxt span { font-size:11px; color:var(--mute); margin-top:4px; letter-spacing:.06em; text-transform:uppercase; }
+  .ring.late .rtxt b { color:var(--red); animation:pulse .6s ease-in-out infinite alternate; }
+  @keyframes pulse { from { transform:scale(1); } to { transform:scale(1.08); } }
+  .msg.ping .row2 { display:flex; gap:8px; margin-top:10px; } .msg.ping .row2 button { margin-top:0; }
+
+  footer { max-width:1120px; margin:0 auto; padding:0 24px 40px; color:var(--mute); font-size:12px; }
+
+  @media (max-width:880px) { main { grid-template-columns:1fr; gap:24px; } .phonewrap { position:static; } .toolbar .hint { margin-left:0; width:100%; } }
+  @media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
+
+  /* ===== Super hero comic theme (overrides) ===== */
+  :root { --ink:#111; --ink-2:#27272a; --mute:#44403c; --line:#111; --bg:#fff7d6; --blue:#2447f5; --blue-d:#1a36c4;
+          --hero-red:#e63946; --hero-yellow:#ffd60a; --heading:Impact,"Arial Black","Haettenschweiler",system-ui,sans-serif; }
+  body { font-family:"Comic Neue","Comic Sans MS","Chalkboard SE","Trebuchet MS",system-ui,sans-serif; background-color:var(--bg);
+         background-image:radial-gradient(rgba(230,57,70,.2) 1.4px, transparent 1.7px); background-size:16px 16px; }
+
+  header { background:var(--hero-red); border-bottom:4px solid #111; height:62px; }
+  header b { font:400 26px/1 var(--heading); letter-spacing:.05em; text-transform:uppercase; color:#fff; text-shadow:2px 2px 0 #111; }
+  header b::before { width:32px; height:32px; border-radius:0; background:var(--hero-yellow);
+    clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
+  header span { color:#fff; font-weight:700; }
+  header span::before { background:#fff; color:#111; border:3px solid #111; }
+  .banner { background:var(--hero-yellow); color:#111; border-bottom:3px solid #111; font-weight:700; }
+
+  .seg { background:#fff; border:3px solid #111; border-radius:8px; padding:0; box-shadow:4px 4px 0 #111; overflow:hidden; }
+  .seg button { border:0; border-radius:0; background:#fff; color:#111; font-weight:800; box-shadow:none; }
+  .seg button + button { border-left:3px solid #111; }
+  .seg button:hover { background:#fff3b0; }
+  .seg button.on { background:var(--hero-yellow); box-shadow:none; }
+  .seg.small { border-width:2px; box-shadow:2px 2px 0 #111; }
+  .seg.small button + button { border-left-width:2px; }
+  #btnReset { border:3px solid transparent; background:transparent; box-shadow:none; color:#111; text-decoration:underline; }
+  #btnReset:hover { background:rgba(17,17,17,.08); }
+  .toolbar .hint { color:#111; font-weight:700; }
+
+  h2 { font:400 19px/1.2 var(--heading); letter-spacing:.06em; text-transform:uppercase; color:#111; text-shadow:2px 2px 0 var(--hero-yellow); }
+
+  .card { border:3px solid #111; border-radius:10px; box-shadow:6px 6px 0 #111; }
+  .row > div:first-child { padding-left:58px; min-height:44px; }
+  .row > div:first-child::before { width:44px; height:44px; background:var(--hero-yellow); color:#111; border:3px solid #111; font:400 16px/1 var(--heading); letter-spacing:.03em; }
+  #cardB .row > div:first-child::before { background:#7dd3fc; color:#111; }
+  .name { font:400 21px/1.2 var(--heading); letter-spacing:.03em; text-transform:uppercase; }
+  .sub { color:#44403c; }
+
+  .tag { border:2px solid #111; color:#111; font-weight:800; box-shadow:2px 2px 0 #111; transform:rotate(-2deg); }
+  .tag.quiet { background:#ffd60a; border-color:#111; color:#111; } .tag.load { background:#7dd3fc; border-color:#111; color:#111; }
+  .tag.ok { background:#86efac; border-color:#111; color:#111; } .tag.wait { background:#e5e7eb; border-color:#111; color:#111; }
+  .tag.bad { background:#fca5a5; border-color:#111; color:#111; }
+
+  .bars { border-bottom:3px solid #111; }
+  .bars i { border:2px solid #111; border-bottom:0; background:#cbd5e1; }
+  .bars i.hot { background:#ff9f1c; } .bars i.blue { background:#2447f5; }
+  .bars i.gap { border:0; background:none; }
+  .legend { color:#44403c; }
+
+  .notice, .notice.done, .notice.bad, .notice.plain { border:3px solid #111; border-radius:12px; box-shadow:4px 4px 0 #111; color:#111; margin-top:24px; }
+  .notice { background:#ffe066; } .notice.done { background:#b7f5c8; } .notice.bad { background:#ffb4b4; } .notice.plain { background:#eceff4; }
+  .notice::after { content:""; position:absolute; top:-12px; left:30px; width:18px; height:18px; background:inherit;
+    border-left:3px solid #111; border-top:3px solid #111; transform:rotate(45deg); }
+  .why { background:#fff; border:2px dashed #111; color:#111; }
+  .ff { border-top:3px dashed #111; }
+
+  button { font-family:"Comic Neue","Comic Sans MS","Chalkboard SE",system-ui,sans-serif; font-weight:800; border:3px solid #111; border-radius:8px;
+           background:#fff; color:#111; box-shadow:3px 3px 0 #111; }
+  button:hover { background:#fff3b0; border-color:#111; }
+  button:active { transform:translate(3px,3px); box-shadow:0 0 0 #111; }
+  button.primary { background:var(--hero-yellow); border-color:#111; color:#111; box-shadow:3px 3px 0 #111; }
+  button.primary:hover { background:#ffe45c; border-color:#111; }
+  #skipAhead, #btnWhy, #optCancel { background:transparent; border:3px solid transparent; box-shadow:none; text-decoration:underline; color:#111; }
+  #skipAhead:hover, #btnWhy:hover, #optCancel:hover { background:rgba(17,17,17,.08); border-color:transparent; }
+  .seg button, .seg button:active { box-shadow:none; transform:none; }
+  button:focus-visible { outline:3px solid var(--blue); outline-offset:2px; }
+
+  .modal-bg { background:rgba(17,17,17,.62); }
+  .modal { border:4px solid #111; border-radius:12px; box-shadow:8px 8px 0 #111; }
+  .modal h3 { font:400 24px/1.2 var(--heading); letter-spacing:.04em; text-transform:uppercase; }
+  .opt:hover { background:#fff3b0; border-color:#111; }
+  .opt span { color:#44403c; font-weight:600; }
+
+  .phone { background:#111; box-shadow:8px 8px 0 var(--hero-red); }
+  .screen { border:3px solid #111; background-color:#fffdf2; background-image:radial-gradient(rgba(36,71,245,.22) 1.4px, transparent 1.7px); background-size:12px 12px; }
+  .screen .time { font:400 38px/1 var(--heading); letter-spacing:.03em; }
+  .statusbar { color:#111; }
+  .idle { color:#111; font-weight:700; }
+  .msg { border:3px solid #111; border-radius:14px; box-shadow:4px 4px 0 #111; background:#fff; color:#27272a; }
+  .msg::before { color:var(--hero-red); font-weight:800; }
+  .msg b { font:400 20px/1.2 var(--heading); letter-spacing:.03em; text-transform:uppercase; }
+  .ring .trk { stroke:#d4d4d8; } .ring .prg { stroke:#2447f5; } .ring.warn .prg { stroke:#ff9f1c; } .ring.late .prg { stroke:#e63946; }
+  .ring .rtxt b { font:400 40px/1 var(--heading); }
+  .caption, .demo .lbl { color:#111; font-weight:700; }
+  footer { color:#44403c; }
+
+  /* Phone tabs + history */
+  .tabbar { display:flex; gap:6px; margin-top:8px; padding:0 4px; }
+  .tabbar button { flex:1; box-shadow:none; border:0; background:transparent; color:#cbd5e1; border-radius:12px; min-height:34px; font-weight:800; }
+  .tabbar button:hover { background:rgba(255,255,255,.12); }
+  .tabbar button:active { transform:none; }
+  .tabbar button.on { background:var(--hero-yellow); color:#111; }
+  .hh { font:400 30px/1 var(--heading); letter-spacing:.03em; text-transform:uppercase; text-align:center; color:#111; margin-bottom:14px; }
+  .hlist { display:flex; flex-direction:column; gap:10px; max-height:370px; overflow:auto; padding:2px 4px 6px 2px; }
+  .hrow { display:flex; justify-content:space-between; align-items:center; gap:8px; background:#fff; border:3px solid #111; border-radius:12px; box-shadow:3px 3px 0 #111; padding:10px 12px; }
+  .hrow b { display:block; font-size:13px; line-height:1.25; color:#111; }
+  .hrow small { color:#44403c; font-size:12px; }
+  .chip { border:2px solid #111; border-radius:999px; font-weight:800; font-size:12px; padding:2px 10px; white-space:nowrap; color:#111; background:#e5e7eb; }
+  .chip.ok { background:#86efac; } .chip.bad { background:#fca5a5; }
+  .hnote { text-align:center; color:#44403c; font-size:12px; margin-top:auto; padding-top:12px; }
+</style>
+</head>
+<body>
+<header><b>Rook Dispatch · Handler console</b><span>Signed in as Kip · My responders (2)</span></header>
+<div class="banner">Prototype for discussion. Course scenario, not a live system. Counts come from the Rook database (data ends 6 Sep). Internal, for Helen only.</div>
+
+<div class="toolbar">
+  <div class="seg" role="group" aria-label="Version">
+    <button id="mToday">Today</button><button id="mProp">Proposed</button>
+  </div>
+  <button id="btnReset">Start over</button>
+  <span class="hint" id="modeHint"></span>
+</div>
+
+<main>
+  <section>
+    <h2>My responders</h2>
+    <div class="card" id="cardA" aria-live="polite"></div>
+    <div class="card" id="cardB"></div>
+  </section>
+
+  <aside class="phonewrap">
+    <h2 style="text-align:center">What Meteor Mite sees</h2>
+    <div class="phone">
+      <div class="statusbar" aria-hidden="true">
+        <span>9:41</span>
+        <span class="sb-icons">
+          <svg viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0 1 13 0"/><path d="M4 7a6 6 0 0 1 8 0"/><circle cx="8" cy="10" r="1" fill="currentColor" stroke="none"/></svg>
+          <svg viewBox="0 0 27 12" fill="none"><rect x="0.5" y="0.5" width="23" height="11" rx="3.5" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="17" height="8" rx="2" fill="currentColor"/><path d="M25 4v4c.8-.3 1.5-1 1.5-2S25.8 4.3 25 4z" fill="currentColor" opacity=".45"/></svg>
+        </span>
+      </div>
+      <div class="screen" id="screen"></div>
+      <div class="tabbar" role="tablist" aria-label="Phone sections"><button id="tabNow" class="on" role="tab">Now</button><button id="tabHist" role="tab">History</button></div>
+    </div>
+    <div class="caption" id="caption" aria-live="polite"></div>
+    <div class="demo">
+      <button class="primary" id="btnPing">Send a test ping</button>
+      <span class="lbl">Demo speed</span>
+      <div class="seg small" role="group" aria-label="Demo speed"><button id="sp1">1x</button><button id="sp5" class="on">5x</button></div>
+    </div>
+  </aside>
+</main>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>Check in with Meteor Mite</h3>
+    <div class="sub">Pick how. Nothing is sent until you choose.</div>
+    <button class="opt" id="optSend"><b>Message their phone</b><span>Asks if they're still reachable.</span></button>
+    <button class="opt" id="optCall"><b>I'll call them</b><span>Marks it in progress.</span></button>
+    <p style="text-align:right;margin:14px 0 0"><button id="optCancel">Cancel</button></p>
+  </div>
+</div>
+
+<footer>
+  Assumptions to confirm: the check-in goes through Rook to the responder's phone (the brief leaves this open), the threshold is "pings down more than half," and the card never shows household or identity detail.
+  The 4-week views are illustrative projections, not data.
+</footer>
+
+<script>
+  var $ = function (id) { return document.getElementById(id); };
+
+  // mode: today | proposed.  step: notice | sent | reachable | calling | notnow.  ff: null | ok | relapse
+  var S = { mode: 'proposed', step: 'notice', ff: null, whyOpen: false };
+
+  var MITE_BEFORE = [11, 11, 10, 11], MITE_NOW = 1;
+  var GALE_BEFORE = [13, 13, 12, 13], GALE_NOW = 21;
+  var PROJ = {
+    ok:      { mite: [4, 7, 9, 10], gale: [18, 16, 14, 13] },
+    relapse: { mite: [4, 7, 5, 3],  gale: [18, 17, 19, 20] }
+  };
+
+  function h(v) { return Math.max(3, Math.round(v / 24 * 44)) + 'px'; }
+  function bar(v, cls) { return '<i class="' + (cls || '') + '" style="height:' + h(v) + '" title="' + v + ' pings"></i>'; }
+
+  function bars(before, now, nowCls, proj, projCls) {
+    var out = before.map(function (v) { return bar(v); }).join('') + bar(now, nowCls);
+    if (proj) out += '<i class="gap"></i>' + proj.map(function (v) { return bar(v, projCls); }).join('');
+    return '<div class="bars">' + out + '</div>';
+  }
+
+  function render() {
+    var today = S.mode === 'today';
+    $('mToday').className = today ? 'on' : '';
+    $('mProp').className = today ? '' : 'on';
+    $('modeHint').textContent = today
+      ? 'What Kip and Meteor Mite get right now.'
+      : 'What they would get with the gone-quiet notice and the way back.';
+    renderMite(today);
+    renderGale(today);
+    renderPhone(today);
+  }
+
+  function renderMite(today) {
+    var tag, body = '';
+    if (today) {
+      $('cardA').innerHTML =
+        '<div class="row"><div><div class="name">Meteor Mite</div><div class="sub">Eastgate · available</div></div>' +
+        '<span class="tag wait">Available</span></div>' +
+        '<div class="notice plain"><p>Nothing on this card shows pings dropped from 11 a week to 1.</p></div>';
+      return;
+    }
+
+    var proj = S.ff ? PROJ[S.ff].mite : null;
+    var chart = bars(MITE_BEFORE, MITE_NOW, 'hot', proj, S.ff === 'relapse' ? 'projbad' : 'proj');
+    var legend = S.ff
+      ? '<div class="legend">Weeks before 4.2, the latest week (orange), then four projected weeks (hatched). Illustrative.</div>'
+      : '<div class="sub">Pings per week: <b>11 → 1</b></div>';
+    var tagHtml, notice;
+
+    if (S.step === 'notice') {
+      tagHtml = '<span class="tag quiet">Gone quiet</span>';
+      notice = '<div class="notice"><p><b>Pings have dropped sharply: about 11 a week to 1.</b><br>' +
+        'None taken since 19 Aug.</p>' +
+        '<p><button class="primary" id="btnCheckin">Check in</button> <button id="btnWhy">Why?</button></p>' +
+        '<div class="why" id="whyBox" style="display:' + (S.whyOpen ? 'block' : 'none') + '">' +
+        'Missed pings lower a responder\'s place in the order, so they\'re offered fewer. Only you can see this.</div></div>';
+    } else if (S.step === 'sent') {
+      tagHtml = '<span class="tag wait">Check-in sent</span>';
+      notice = '<div class="notice"><p><b>' + (S.tries > 1 ? 'Check-in sent again.' : 'Check-in sent.') + '</b> Waiting for Meteor Mite to answer.</p>' +
+        '<p><button id="skipAhead">Demo: no reply after a day</button></p></div>';
+    } else if (S.step === 'calling') {
+      tagHtml = '<span class="tag wait">You are calling</span>';
+      notice = '<div class="notice"><p><b>Marked as “I\'m calling.”</b> We\'ll prompt you to record what you found.</p>' +
+        '<p><button class="primary" id="callDone">Mark reachable</button> <button id="callUnavail">Not available</button> <button id="callNo">No answer</button></p></div>';
+    } else if (S.step === 'noreply') {
+      tagHtml = '<span class="tag bad">No response</span>';
+      notice = '<div class="notice"><p><b>No response from Meteor Mite.</b> ' + (S.tries > 1 ? 'Tried ' + S.tries + ' times' : 'Tried once') +
+        (S.how === 'call' ? ' by phone.' : ' by message.') + '</p><p>What next?</p>' +
+        '<p><button class="primary" id="retry">Try again</button> <button id="checkPhone">Check their phone</button> <button id="pausePings">Pause pings</button></p></div>';
+    } else if (S.step === 'delivery') {
+      tagHtml = '<span class="tag wait">Checking delivery</span>';
+      notice = '<div class="notice plain"><p><b>Asked Engineering to check pings are reaching their phone.</b> The result will show here.</p>' +
+        '<p><button id="pausePings">Pause pings</button></p></div>';
+    } else if (S.step === 'paused') {
+      tagHtml = '<span class="tag wait">Pings paused</span>';
+      notice = '<div class="notice plain"><p><b>Pings are paused until Meteor Mite responds.</b></p>' +
+        '<p><button id="resumePings">Resume pings</button></p></div>';
+    } else if (S.step === 'unavailable') {
+      tagHtml = '<span class="tag wait">Not available</span>';
+      notice = '<div class="notice"><p><b>Meteor Mite is not available.</b></p><p>Set their availability or try again later.</p></div>';
+    } else if (S.step === 'notnow') {
+      tagHtml = '<span class="tag wait">Not available</span>';
+      notice = '<div class="notice"><p><b>Meteor Mite said not right now.</b></p><p>Set their availability or try again later.</p></div>';
+    } else { // reachable
+      if (S.ff === 'relapse') {
+        tagHtml = '<span class="tag bad">Pings back, still missing</span>';
+        notice = '<div class="notice bad"><p><b>Pings came back, then dropped again.</b> Most went unanswered.</p></div>';
+      } else if (S.ff === 'ok') {
+        tagHtml = '<span class="tag ok">Back to normal</span>';
+        notice = '<div class="notice done"><p><b>Pings are back to about their old level.</b></p>' +
+          '<p>Nobody changed a setting. The Gale\'s load came down as Meteor Mite\'s pings returned.</p></div>';
+      } else {
+        tagHtml = '<span class="tag ok">Reachable</span>';
+        notice = '<div class="notice done"><p><b>Meteor Mite says they\'re reachable.</b></p>' +
+          '<p>Their pings should build back up on their own.</p>' +
+          '<div class="ff"><b>See the next four weeks</b>' +
+          '<div class="btns"><button id="ffOk">If they answer in time</button><button id="ffBad">If they still miss most pings</button></div>' +
+          '<div class="legend">Illustrative projections, not data.</div></div></div>';
+      }
+    }
+
+    $('cardA').innerHTML =
+      '<div class="row"><div><div class="name">Meteor Mite</div><div class="sub">Eastgate · available</div></div>' + tagHtml + '</div>' +
+      chart + legend + notice;
+    wire();
+  }
+
+  function renderGale(today) {
+    if (today) {
+      $('cardB').innerHTML =
+        '<div class="row"><div><div class="name">The Gale</div><div class="sub">Eastgate · available</div></div>' +
+        '<span class="tag wait">Available</span></div>' +
+        '<div class="notice plain"><p>Nothing on this card shows pings rose from 13 to 21 a week.</p></div>';
+      return;
+    }
+    var proj = S.ff ? PROJ[S.ff].gale : null;
+    var tag = S.ff === 'ok' ? '<span class="tag ok">Load easing</span>' :
+              S.ff === 'relapse' ? '<span class="tag load">Still carrying extra load</span>' :
+              '<span class="tag load">Carrying extra load</span>';
+    var sub = S.ff
+      ? '<div class="legend">Weeks before 4.2, the latest week (blue), then four projected weeks (hatched). Illustrative.</div>'
+      : '<div class="sub">Pings per week: about 13 before 4.2, 21 in the latest week of data. Some of these are pings Meteor Mite would normally get.</div>';
+    $('cardB').innerHTML =
+      '<div class="row"><div><div class="name">The Gale</div><div class="sub">Eastgate · available</div></div>' + tag + '</div>' +
+      bars(GALE_BEFORE, GALE_NOW, 'blue', proj, 'projblue') + sub;
+  }
+
+  // --- Ping countdown (demo). The real ping wait is 60 seconds. ---
+  var PING_WAIT = 60, pingTimer = null, pingLeft = PING_WAIT, pingStart = 0, pingSpeed = 5, pingSaved = PING_WAIT;
+
+  function curLeft() { return Math.max(0, pingLeft - (Date.now() - pingStart) / 1000 * pingSpeed); }
+  function stopPing() { if (pingTimer) { clearInterval(pingTimer); pingTimer = null; } }
+  function startPing(left) {
+    stopPing(); pingLeft = left; pingStart = Date.now(); S.ping = 'live'; phoneTab = 'now';
+    pingTimer = setInterval(function () {
+      if (curLeft() <= 0) { stopPing(); histAdd('ping', 'Missed', 'bad'); S.ping = 'missed'; render(); } else { paintPing(curLeft()); }
+    }, 100);
+    render();
+  }
+  function paintPing(left) {
+    var n = $('ringNum'), p = $('ringPrg'), r = $('ring');
+    if (n) n.textContent = Math.ceil(left);
+    if (p) p.style.strokeDashoffset = (282.7 * (1 - left / PING_WAIT)).toFixed(1);
+    if (r) r.className = 'ring ' + (left <= 10 ? 'late' : left <= 20 ? 'warn' : 'ok');
+  }
+
+  function renderPing(scr, cap, today) {
+    var back = '<div class="undo"><button id="pgDone">Done</button></div>';
+    if (S.ping === 'live') {
+      scr.innerHTML = '<div class="time">9:41</div>' +
+        '<div class="msg ping"><b>New callout</b><span class="sub2">Eastgate · needs a response</span>' +
+        '<div class="ring ok" id="ring"><svg viewBox="0 0 100 100"><circle class="trk" cx="50" cy="50" r="45"/>' +
+        '<circle class="prg" id="ringPrg" cx="50" cy="50" r="45" transform="rotate(-90 50 50)" style="stroke-dashoffset:0"/></svg>' +
+        '<div class="rtxt"><b id="ringNum">60</b><span>seconds</span></div></div>' +
+        '<button class="primary" id="pgTake">Take it</button><button id="pgNo">Turn down</button></div>';
+      paintPing(curLeft());
+      cap.textContent = pingSpeed === 1 ? 'Real speed: you have 60 seconds.' : 'Demo at ' + pingSpeed + 'x. The real wait is 60 seconds.';
+      $('pgTake').onclick = function () { stopPing(); histAdd('ping', 'Taken', 'ok'); S.ping = 'taken'; render(); };
+      $('pgNo').onclick = function () { pingSaved = curLeft(); stopPing(); histAdd('ping', 'Turned down', ''); S.ping = 'declined'; render(); };
+    } else if (S.ping === 'taken') {
+      scr.innerHTML = '<div class="time">9:41</div><div class="idle"><b>You took it.</b><br>The callout is yours.</div>' + back;
+      cap.textContent = 'Taken.';
+    } else if (S.ping === 'declined') {
+      scr.innerHTML = '<div class="time">9:41</div><div class="idle"><b>Turned down.</b><br>It went to the next responder.</div>' +
+        '<div class="undo">Tapped by mistake? <button id="pgUndo">Undo</button> <button id="pgDone">Done</button></div>';
+      cap.textContent = 'Undo puts the ping back with the time you had left.';
+      $('pgUndo').onclick = function () { histPop(); startPing(pingSaved); };
+    } else { // missed
+      scr.innerHTML = '<div class="time">9:41</div><div class="idle"><b>Missed.</b><br>It went to the next responder.<br><br>' +
+        (today ? 'Missed pings lower your place in the order.' : 'We\'ll check in before a miss costs you pings.') + '</div>' + back;
+      cap.textContent = today ? 'Today: a miss counts like a turn-down.' : 'Proposed: your handler is told and can check in.';
+    }
+    if ($('pgDone')) $('pgDone').onclick = function () { S.ping = null; render(); };
+  }
+
+  // --- Phone history: what the responder has answered before. Seed entries are illustrative. ---
+  var phoneTab = 'now';
+  var HIST_SEED = [
+    { kind: 'checkin', when: 'Tue 6 Oct',  ans: 'Yes, I\'m reachable', tone: 'ok' },
+    { kind: 'ping',    when: 'Tue 6 Oct',  ans: 'Taken',               tone: 'ok' },
+    { kind: 'checkin', when: 'Mon 28 Sep', ans: 'Not right now',       tone: '' },
+    { kind: 'ping',    when: 'Mon 28 Sep', ans: 'Missed',              tone: 'bad' }
+  ];
+  var HIST_TITLE = { checkin: 'Check-in from your handler', ping: 'Callout ping', call: 'Call from your handler' };
+  var hist = [];
+  function histAdd(kind, ans, tone) { hist.unshift({ kind: kind, when: 'Just now', ans: ans, tone: tone }); }
+  function histPop() { hist.shift(); }
+
+  function renderHistory(scr, cap) {
+    var rows = hist.concat(HIST_SEED).map(function (e) {
+      return '<div class="hrow"><div><b>' + HIST_TITLE[e.kind] + '</b><small>' + e.when + '</small></div>' +
+             '<span class="chip ' + e.tone + '">' + e.ans + '</span></div>';
+    }).join('');
+    scr.innerHTML = '<div class="hh">History</div><div class="hlist">' + rows + '</div>' +
+      '<div class="hnote">Older entries are examples for the demo.</div>';
+    cap.textContent = 'Your past check-ins and pings, newest first.';
+  }
+
+  function renderPhone(today) {
+    var scr = $('screen'), cap = $('caption');
+    $('tabNow').className = phoneTab === 'now' ? 'on' : '';
+    $('tabHist').className = phoneTab === 'history' ? 'on' : '';
+    if (phoneTab === 'history') { renderHistory(scr, cap); return; }
+    if (S.ping) { renderPing(scr, cap, today); return; }
+    if (today) {
+      scr.innerHTML = '<div class="time">9:41</div><div class="idle">Nothing new.</div>';
+      cap.textContent = 'Today: nothing reaches them, and nothing tells them why.';
+      return;
+    }
+    if (S.step === 'paused') {
+      scr.innerHTML = '<div class="time">9:42</div>' +
+        '<div class="msg"><b>Pings are paused</b>Your handler paused them because they couldn\'t reach you.' +
+        '<button class="primary" id="phBack">I\'m back</button></div>';
+      cap.textContent = 'This is the responder\'s way back.';
+      $('phBack').onclick = function () { histAdd('checkin', 'Yes, I\'m reachable', 'ok'); S.step = 'reachable'; render(); };
+    } else if (S.step === 'sent' || (S.step === 'noreply' && S.how === 'message')) {
+      var again = S.step === 'noreply' || S.tries > 1;
+      scr.innerHTML = '<div class="time">9:42</div>' +
+        '<div class="msg"><b>' + (again ? 'Reminder: still reachable?' : 'You\'ve missed some pings') + '</b>' + (again ? 'You\'ve missed some pings.' : 'Still reachable?') +
+        '<button class="primary" id="phYes">Yes, I\'m reachable</button>' +
+        '<button id="phNo">Not right now</button></div>';
+      cap.textContent = 'Your turn: answer as the responder.';
+      $('phYes').onclick = function () { histAdd('checkin', 'Yes, I\'m reachable', 'ok'); S.step = 'reachable'; render(); };
+      $('phNo').onclick = function () { histAdd('checkin', 'Not right now', ''); S.step = 'notnow'; render(); };
+    } else if (S.step === 'reachable') {
+      var msg = S.ff === 'relapse' ? 'Pings are back, but some went unanswered.' :
+                S.ff === 'ok' ? 'Pings are coming through again.' :
+                '<b>Thanks.</b><br>You should start getting pings again.';
+      scr.innerHTML = '<div class="time">9:43</div><div class="idle">' + msg + '</div>';
+      cap.textContent = 'Handler card updated.';
+    } else if (S.step === 'unavailable') {
+      scr.innerHTML = '<div class="time">9:43</div><div class="idle">Got it. We\'ll ask again later.</div>' +
+        '<div class="undo">Tapped by mistake? <button id="phUndo">Undo</button></div>';
+      cap.textContent = 'The undo covers a wrong tap (one support ticket asked for this).';
+      $('phUndo').onclick = function () { histPop(); S.step = 'sent'; render(); };
+    } else if (S.step === 'notnow') {
+      scr.innerHTML = '<div class="time">9:43</div><div class="idle">Got it. We\'ll ask again later.</div>' +
+        '<div class="undo">Tapped by mistake? <button id="phUndo">Undo</button></div>';
+      cap.textContent = 'The undo covers a wrong tap (one support ticket asked for this).';
+      $('phUndo').onclick = function () { histPop(); S.step = 'sent'; render(); };
+    } else {
+      scr.innerHTML = '<div class="time">9:41</div><div class="idle">Nothing new.</div>';
+      cap.textContent = S.step === 'calling' ? 'Kip is calling them.' : 'Click “Check in” on the console to see what lands here.';
+    }
+  }
+
+  function wire() {
+    if ($('btnWhy')) $('btnWhy').onclick = function () { S.whyOpen = !S.whyOpen; render(); };
+    if ($('btnCheckin')) $('btnCheckin').onclick = function () { $('modalBg').style.display = 'flex'; };
+    if ($('callDone')) $('callDone').onclick = function () { histAdd('call', 'Reachable', 'ok'); S.step = 'reachable'; render(); };
+    if ($('skipAhead')) $('skipAhead').onclick = function () { S.how = 'message'; histAdd('checkin', 'No response', 'bad'); S.step = 'noreply'; render(); };
+    if ($('callNo')) $('callNo').onclick = function () { S.how = 'call'; S.step = 'noreply'; render(); };
+    if ($('retry')) $('retry').onclick = function () {
+      S.tries = (S.tries || 1) + 1;
+      if (S.how === 'call') { S.step = 'calling'; } else { histPop(); S.step = 'sent'; phoneTab = 'now'; }
+      render();
+    };
+    if ($('checkPhone')) $('checkPhone').onclick = function () { S.step = 'delivery'; render(); };
+    if ($('pausePings')) $('pausePings').onclick = function () { S.step = 'paused'; render(); };
+    if ($('resumePings')) $('resumePings').onclick = function () { S.step = 'notice'; render(); };
+    if ($('callUnavail')) $('callUnavail').onclick = function () { histAdd('call', 'Not available', ''); S.step = 'unavailable'; render(); };
+    if ($('ffOk')) $('ffOk').onclick = function () { S.ff = 'ok'; render(); };
+    if ($('ffBad')) $('ffBad').onclick = function () { S.ff = 'relapse'; render(); };
+  }
+
+  $('optCancel').onclick = function () { $('modalBg').style.display = 'none'; };
+  $('optSend').onclick = function () { $('modalBg').style.display = 'none'; S.step = 'sent'; S.how = 'message'; S.tries = 1; phoneTab = 'now'; render(); };
+  $('tabNow').onclick = function () { phoneTab = 'now'; render(); };
+  $('tabHist').onclick = function () { phoneTab = 'history'; render(); };
+  $('optCall').onclick = function () { $('modalBg').style.display = 'none'; S.step = 'calling'; S.how = 'call'; S.tries = 1; render(); };
+  $('mToday').onclick = function () { S.mode = 'today'; render(); };
+  $('mProp').onclick = function () { S.mode = 'proposed'; render(); };
+  $('btnReset').onclick = function () { stopPing(); hist = []; phoneTab = 'now'; S ={ mode: S.mode, step: 'notice', ff: null, whyOpen: false }; render(); };
+  $('btnPing').onclick = function () { startPing(PING_WAIT); };
+  function setSpeed(x) {
+    if (S.ping === 'live') { pingLeft = curLeft(); pingStart = Date.now(); }
+    pingSpeed = x;
+    $('sp1').className = x === 1 ? 'on' : ''; $('sp5').className = x === 5 ? 'on' : '';
+    if (S.ping === 'live') render();
+  }
+  $('sp1').onclick = function () { setSpeed(1); };
+  $('sp5').onclick = function () { setSpeed(5); };
+
+  render();
+</script>
+</body>
+</html>

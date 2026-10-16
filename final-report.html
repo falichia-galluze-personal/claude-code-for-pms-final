@@ -264,7 +264,18 @@
         </ul>
       </div>
     </div>
-    <p class="src">Why it matters: the question that could have caught 4.2 sat unanswered for two months because no one owned it.</p>
+        <div class="grid g2" style="align-items:start;margin-top:26px">
+      <div class="prompt"><q><span class="pn">#1</span>  Can you explain and clarify how you came up with your unverified hypothesis? What facts and pieces of information led to this hypothesis? "the 4.2 weighting applies equally to responders who turn pings down, so a drop in acceptance pushes them lower and they get pinged less"</q></div>
+      <div class="finding">
+        <b>The first theory was a guess I could trace, and it was later revised.</b>
+        <ul>
+          <li>It rested on three things: the 4.2 weighting change, Marcus's unanswered question, and Priya's 'seasonal' view.</li>
+          <li>Marked unverified from the start, so I knew what to test.</li>
+          <li>Modules 3 and 4 moved it to the 60s wait plus misses scored as declines.</li>
+        </ul>
+      </div>
+    </div>
+<p class="src">Why it matters: the question that could have caught 4.2 sat unanswered for two months because no one owned it.</p>
   </div>
 </section>
 
@@ -289,6 +300,17 @@
         </div>
       </div>
     </div>
+    <div class="grid g2" style="align-items:start;margin-top:26px">
+      <div class="prompt"><q><span class="pn">#16</span>  If I'd only read the interviews, what would I have got wrong?</q></div>
+      <div class="finding">
+        <b>Interviews alone would have pointed me the wrong way.</b>
+        <ul>
+          <li>They over-weight 'gone before I could answer', which the 60s wait explains.</li>
+          <li>They read like a UX backlog, so 'seasonal' looks plausible.</li>
+          <li>They would have hidden the four responders who were locked out.</li>
+        </ul>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -307,6 +329,17 @@
           <li>Weekly acceptance: flat ~75–78%, then 54% the week of 10 Aug, 73% by 31 Aug.</li>
           <li>Missed pings stepped up on release day, so the 60s wait was live from day one.</li>
           <li>Tickets lag the data by about 5 days; "August is quiet" doesn't explain pings down ~70%.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid g2" style="align-items:start;margin-top:26px">
+      <div class="prompt"><q><span class="pn">#12</span>  The previous PM said this was just August being quiet. Is there anything in this file that would tell me whether that was right?</q></div>
+      <div class="finding">
+        <b>Seasonality is real but does not explain it.</b>
+        <ul>
+          <li>Callouts dipped about 15% outside the four's areas.</li>
+          <li>The four's areas were back to about 49 a week by late August, while pings to the four stayed near 3.</li>
+          <li>The database starts 29 Jun, so there is no earlier August to compare.</li>
         </ul>
       </div>
     </div>
@@ -331,7 +364,18 @@
         </ul>
       </div>
     </div>
-    <p class="src">This also answers Marcus's 14 Aug question: the change applied to everyone, no tenure check.</p>
+        <div class="grid g2" style="align-items:start;margin-top:26px">
+      <div class="prompt"><q><span class="pn">#26</span>  Somebody has been quiet for a month. Walk me through, step by step, exactly what would have to happen for them to start getting work again.</q></div>
+      <div class="finding">
+        <b>There is no way back in the code.</b>
+        <ul>
+          <li>Nothing lets a score recover with time.</li>
+          <li>Only a taken ping adds credit (+0.08), and only if they are offered one.</li>
+          <li>So 'wait until September' has no mechanism behind it.</li>
+        </ul>
+      </div>
+    </div>
+<p class="src">This also answers Marcus's 14 Aug question: the change applied to everyone, no tenure check.</p>
   </div>
 </section>
 
@@ -350,6 +394,17 @@
           <li>The brief (<code>brief.md</code>) is the one-page case; the prototype is the part she can click.</li>
           <li>Prompt #16 pulled back two ideas as too detailed: clear and concise won.</li>
           <li>Prompt #18 set they/them for people I don't know the pronouns of.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid g2" style="align-items:start;margin-top:26px">
+      <div class="prompt"><q><span class="pn">#20</span>  Should we add a flow and option besides "Mark reachable" to our prototype for when a handler checks in with a responder by indicating "I'll call them". What if the responder was not reachable? Can you give suggestions.</q></div>
+      <div class="finding">
+        <b>The prototype grew a path for 'not reachable'.</b>
+        <ul>
+          <li>Added a 'Not available' option that follows the same pattern as messaging their phone (#21, #22).</li>
+          <li>A 'No answer' path was added, with what to do next still my open thought.</li>
+          <li>Each added path is a place to test with Kip and a responder.</li>
         </ul>
       </div>
     </div>
@@ -376,6 +431,17 @@ Turn that into a skill called review-checklist, so I can point it at any brief a
           <li>Reads any brief, reports Pass / Fix / Can't tell with a quote for each check, a fix list and a one-line "Ready?".</li>
           <li>Read-only: it never edits the brief.</li>
           <li>Prompt #6 scheduled it for Mondays, ~9:06 AM, first run 19 Oct. It only runs while the app is open.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="grid g2" style="align-items:start;margin-top:26px">
+      <div class="prompt"><q><span class="pn">#4</span>  run /review-checklist on 05-super-speed/brief.md</q></div>
+      <div class="finding">
+        <b>The skill found gaps in my own brief on its first real run.</b>
+        <ul>
+          <li>Fix on owner, how we'll know, and scope. Pass on problem before fix.</li>
+          <li>Verdict: not ready to go further yet.</li>
+          <li>It only reads and reports: the brief was not edited.</li>
         </ul>
       </div>
     </div>

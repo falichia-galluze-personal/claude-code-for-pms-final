@@ -89,7 +89,8 @@
   .frame { border:4px solid var(--ink); border-radius:12px; box-shadow:8px 8px 0 var(--ink); overflow:hidden; background:#fff; }
   .frame .bar-top { background:var(--ink); color:#fff; padding:6px 12px; font-size:13px; display:flex; justify-content:space-between; }
   .frame .bar-top a { color:var(--yellow); }
-  iframe { width:100%; height:560px; border:0; display:block; }
+  iframe { width:100%; height:min(820px,calc(100vh - 150px)); min-height:640px; border:0; display:block; }
+  #s12 .stage { max-width:1320px; }
   .steps { counter-reset:s; list-style:none; padding:0; margin:0; }
   .steps li { counter-increment:s; position:relative; padding:8px 0 8px 46px; }
   .steps li::before { content:counter(s); position:absolute; left:0; top:6px; width:34px; height:34px; border-radius:50%; background:var(--yellow); border:3px solid var(--ink); font:400 16px/28px var(--head); text-align:center; }
@@ -386,11 +387,11 @@ Turn that into a skill called review-checklist, so I can point it at any brief a
   <div class="stage">
     <div class="kicker">The fix, shown from the person it happens to</div>
     <h2>Not a setting. Something Kip would notice.</h2>
-    <div class="grid" style="grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start">
-      <div class="frame">
-        <div class="bar-top"><span>prototype.html · click Today / Proposed, then "Check in"</span><a href="05-super-speed/prototype.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
-        <iframe src="05-super-speed/prototype.html" title="Rook Dispatch gone-quiet prototype" loading="lazy"></iframe>
-      </div>
+    <div class="frame">
+      <div class="bar-top"><span>prototype.html · click Today / Proposed, then "Check in"</span><a href="05-super-speed/prototype.html" target="_blank" rel="noopener">Open full screen ↗</a></div>
+      <iframe src="05-super-speed/prototype.html" title="Rook Dispatch gone-quiet prototype" loading="lazy"></iframe>
+    </div>
+    <div class="grid g2" style="gap:28px;align-items:start;margin-top:26px">
       <div>
         <ol class="steps">
           <li><b>Today:</b> the card says "Available". Nothing shows pings fell 11 → 1 a week.</li>
@@ -398,7 +399,9 @@ Turn that into a skill called review-checklist, so I can point it at any brief a
           <li><b>The responder</b> gets a plain message, a 60-second ping ring, an undo for a wrong tap and a history tab.</li>
           <li><b>The way back:</b> an answer lifts them out of the hole. The prototype's four-week views are illustrative.</li>
         </ol>
-        <div class="box" style="margin-top:12px;padding:12px 14px;font-size:14.5px"><b>Build order I'd take to Helen and Marcus:</b> (1) misses neutral or a small penalty plus a one-time reset, (2) scores ease back toward neutral, (3) confirm push delivery, add an undo, (4) log answer time, rank and delivery with a per-responder drop alert, (5) only then tune the wait. One change per release.</div>
+      </div>
+      <div>
+        <div class="box" style="padding:14px 16px;font-size:15px"><b>Build order I'd take to Helen and Marcus:</b> (1) misses neutral or a small penalty plus a one-time reset, (2) scores ease back toward neutral, (3) confirm push delivery, add an undo, (4) log answer time, rank and delivery with a per-responder drop alert, (5) only then tune the wait. One change per release.</div>
       </div>
     </div>
     <p class="src">Not agreed yet: Wen Li and Marcus must size the penalty and decay, and say whether pausing pings and a delivery check are allowed. If the frame is blank, open <code>05-super-speed/prototype.html</code> directly.</p>
